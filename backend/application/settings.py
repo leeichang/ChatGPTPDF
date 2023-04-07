@@ -397,5 +397,7 @@ PLUGINS_URL_PATTERNS = []
 # ...
 
 # ********** 一键导入插件配置结束 **********
-MEDIA_ROOT = os.path.join(BASE_DIR, 'upload')
+MEDIA_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'upload')
 MEDIA_URL = '/upload/'
+
+os.environ['FILE_UPLOAD_DIR'] = MEDIA_ROOT

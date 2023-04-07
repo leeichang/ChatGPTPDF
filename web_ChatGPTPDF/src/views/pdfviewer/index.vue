@@ -1,64 +1,67 @@
-<script lang='ts'>
-import { defineComponent, onMounted, ref } from "vue";
+<script lang="ts">
+import { defineComponent, onMounted, ref, watch } from "vue";
 import * as pdfjsLib from "pdfjs-dist";
 import "pdfjs-dist/build/pdf.worker.entry.js";
 
 export default defineComponent({
-  name: "PdfViewer",
-  setup() {
-    const pdfCanvas = ref<HTMLCanvasElement | null>(null);
-    // PDF文件的URL
-    const url = "sample.pdf";
+	name: "PdfViewer",
+	props: {
+		scale: {
+			type: Number,
+			default: 1.35,
+		},
+	},
+	setup(props) {
+		const pdfCanvas = ref<HTMLCanvasElement | null>(null);
+		const url = "sample.pdf";
+		const pdfScale = ref(props.scale);
 
-    // 載入PDF文件
-    const loadPdf = async () => {
-      const pdfDoc = await pdfjsLib.getDocument(url).promise;
+		const loadPdf = async () => {
+			const pdfDoc = await pdfjsLib.getDocument(url).promise;
+			const page = await pdfDoc.getPage(1);
+			const scale = pdfScale.value;
+			const canvas = pdfCanvas.value;
+			if (!canvas) {
+				return;
+			}
+			const context = canvas.getContext("2d");
+			if (!context) {
+				return;
+			}
+			const viewport = page.getViewport({ scale });
+			canvas.width = viewport.width;
+			canvas.height = viewport.height;
+			await page.render({
+				canvasContext: context,
+				viewport,
+			});
+		};
 
-      // 獲取第1頁
-      const page = await pdfDoc.getPage(1);
+		onMounted(() => {
+			loadPdf();
+		});
 
-      // 設置縮放比例
-      const scale = 1;
+		watch(
+			() => props.scale,
+			(newScale) => {
+				pdfScale.value = newScale;
+			}
+		);
 
-      // 獲取渲染用的canvas元素
-      const canvas = pdfCanvas.value;
+		watch(pdfScale, () => {
+			loadPdf();
+		});
 
-      if (!canvas) {
-        return;
-      }
-
-      // 獲取渲染上下文
-      const context = canvas.getContext("2d");
-
-      if (!context) {
-        return;
-      }
-
-      // 計算渲染用的canvas元素的寬度和高度
-      const viewport = page.getViewport({ scale });
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      // 渲染第1頁
-      await page.render({
-        canvasContext: context,
-        viewport,
-      });
-    };
-
-    onMounted(() => {
-      loadPdf();
-    });
-
-    return {
-      pdfCanvas,
-    };
-  },
+		return {
+			pdfCanvas,
+			pdfScale,
+		};
+	},
 });
 </script>
 
 <template>
-  <div>
-    <canvas ref="pdfCanvas"></canvas>
-  </div>
+	<div>
+		<canvas ref="pdfCanvas"></canvas>
+	</div>
 </template>
