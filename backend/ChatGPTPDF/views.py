@@ -9,6 +9,7 @@ from .models import ChatGPTPDF
 from .serializers import ChatGPTPDFSerializer,ChatGPTPDFCreateUpdateSerializer
 from dvadmin.utils.viewset import CustomModelViewSet
 from rest_framework.authentication import BaseAuthentication
+from drf_yasg.utils import swagger_auto_schema
 import uuid
 class ChatGPTPDFViewSet(CustomModelViewSet):
     """
@@ -39,7 +40,14 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
     #     else:
     #         # Return the default list of authenticators for other methods
     #         return super().get_authenticators()
-
+    @action(detail=False, methods=['POST'])
+    def set_qa_documents(self, request):
+        ChatGPTPDF.set_qa_documents(request.data['document_ids'])
+        std_data={
+            "status":"Success"
+        }
+        return Response(std_data)
+    
     @action(detail=False, methods=['POST'])
     def perform_create(self, serializer):
         file = self.request.data['file']
@@ -59,12 +67,17 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
             file_size=file_size,
             file_path=file_path,
             file_uuid =file_uuid,
+            creator_id= 1,
         )
+        ChatGPTPDF.handleFileIndex(file_path,file_uuid)
+        obj = ChatGPTPDF.objects.get(file_uuid=file_uuid)
+        obj.indexed = True
+        obj.save()
         return Response(status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['GET'])
     def my_files(self, request):
-        files = self.queryset.filter(creator=request.query_params['user'])
+        files = self.queryset.filter(creator=request.query_params['user'] ,indexed = True )
         serializer = self.serializer_class(files, many=True)
         std_data={
             "status":"Success",
@@ -72,13 +85,15 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
         }
         return Response(std_data,status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'])
-    def download(self, request, pk):
-        file = ChatGPTPDF.objects.get(pk=pk)
-        file_path = file.file.path
+    @action(detail=False, methods=['GET'])
+    @swagger_auto_schema(operation_id='downloadFile')  # 將 'my_view' 替換為您的 view 函數名稱
+    def downloadFile(self, request):
+        file = ChatGPTPDF.objects.get(id=request.query_params['id'])
+        file_path = file.file_path
         with open(file_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/octet-stream")
-            response['Content-Disposition'] = f'attachment; filename="{file.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{file.file_name}"'
+            
             return response
 
     @action(detail=True, methods=['DELETE'])

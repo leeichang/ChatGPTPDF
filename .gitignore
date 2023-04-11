@@ -6,3 +6,5 @@
 .history/
 .vscode/
 .DS_Store
+/upload/
+/index/

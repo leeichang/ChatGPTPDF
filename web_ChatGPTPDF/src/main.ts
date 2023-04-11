@@ -17,6 +17,8 @@ async function bootstrap() {
 
   await setupRouter(app)
 
+	//app.use(createPinia()).mount('#app');
+
   app.mount('#app')
 }
 

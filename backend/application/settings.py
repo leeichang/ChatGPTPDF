@@ -400,4 +400,7 @@ PLUGINS_URL_PATTERNS = []
 MEDIA_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'upload')
 MEDIA_URL = '/upload/'
 
+INDEX_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'index')
+
 os.environ['FILE_UPLOAD_DIR'] = MEDIA_ROOT
+os.environ['FILE_INDEX_DIR'] = INDEX_ROOT
