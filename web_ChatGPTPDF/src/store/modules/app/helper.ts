@@ -19,7 +19,7 @@ export function defaultSetting(): AppState {
     theme: "light",
     language: "zh-CN",
     selectedKeys: [],
-    pdf: new Blob(),
+    pdf: null,
   };
 }
 

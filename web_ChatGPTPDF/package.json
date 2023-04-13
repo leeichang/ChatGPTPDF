@@ -11,8 +11,8 @@
     "vue"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check build-only",
+    "dev": "vite --mode development",
+    "build": "cross-env NODE_ENV=production run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
@@ -26,6 +26,7 @@
     "@traptitech/markdown-it-katex": "^3.6.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/core": "^9.13.0",
+    "cross-env": "^7.0.3",
     "highlight.js": "^11.7.0",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.4",
@@ -33,6 +34,7 @@
     "naive-ui": "^2.34.3",
     "pdfjs-dist": "^3.5.141",
     "pinia": "^2.0.33",
+    "vite-plugin-compression": "^0.5.1",
     "vue": "^3.2.47",
     "vue-draggable-resizable": "^2.3.0",
     "vue-i18n": "^9.2.2",

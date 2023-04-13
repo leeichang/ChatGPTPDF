@@ -1,6 +1,6 @@
 import { get, post } from "@/utils/request";
 //import { useSettingStore } from "@/store";
-import { MyFile } from "@/typings/user.d.ts";
+import { MyFile } from "@/typings/user";
 import axios from "axios"; // 引入 MyFile 介面，並指定其路徑
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -19,9 +19,9 @@ export async function getMyFiles(userId: number): Promise<MyFile[]> {
   }
 }
 
-export async function downloadFile(uuid: string): Promise<any> {
+export async function downloadFile(id: number): Promise<any> {
   // Define the url to be used in the get request
-  const url = `${API_BASE_URL}api/ChatGPTPDF/File/downloadFile/?id=${uuid}`
+  const url = `${API_BASE_URL}api/ChatGPTPDF/File/downloadFile/?id=${id}`
   // Call the get function from the request module with the url and method set to 'GET'
   const response = await axios.get(url, {
     responseType: "arraybuffer",

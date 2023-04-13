@@ -10,6 +10,7 @@ import {
   NText,
   NUpload,
   NUploadDragger,
+  UploadFileInfo,
   useMessage,
 } from "naive-ui";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
@@ -19,7 +20,7 @@ import { useAppStore, useChatStore } from "@/store";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
 import { PromptStore } from "@/components/common";
 import { getMyFiles, set_qa_documents } from "@/api/user";
-import { isArray } from "lodash";
+import { options } from "@/typings/global";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const UploadUrl = `${API_BASE_URL}api/ChatGPTPDF/File/perform_create/`;
@@ -32,7 +33,7 @@ const show = ref(false);
 const collapsed = computed(() => appStore.siderCollapsed);
 
 const selected_pdf_ids = ref([]);
-const options = ref([]);
+const options = ref<options[]>([]);
 
 const message = useMessage();
 const uploadRef = ref(null);
@@ -75,7 +76,7 @@ async function fetchData() {
     files.forEach((file) => {
       const firstUnderscoreIndex = file.file_name.indexOf("_"); // 找到第一個底線的索引
       const lastDotIndex = file.file_name.lastIndexOf("."); // 找到最後一個句點的索引
-      const newName =
+      const newName: string =
         file.file_name.substring(0, firstUnderscoreIndex) +
         file.file_name.substring(lastDotIndex); // 取底線前的內容加上最後一個句點以後的文字當副檔名
       options.value.push({
@@ -100,7 +101,7 @@ async function fetchData() {
 //   }
 // };
 
-const handleFinish = async ({
+const handleFinish = ({
   file,
   event,
 }: {
@@ -108,8 +109,11 @@ const handleFinish = async ({
   event?: ProgressEvent;
 }) => {
   message.success("Upload successfully");
-  await fetchData();
-  return "";
+  fetchData();
+  set_qa_documents(selected_pdf_ids.value).then((response) => {
+    message.success("setting successfully");
+  });
+  appStore.setSelectedKeys(selected_pdf_ids.value);
 };
 
 watch(
@@ -124,12 +128,12 @@ watch(
 );
 
 watch(selected_pdf_ids, (newValue) => {
-	if(newValue.length > 0 ){
-		set_qa_documents(newValue).then((response) => {
-			message.success("setting successfully");
-		});
-		appStore.setSelectedKeys(newValue);
-	}
+  if (newValue.length > 0) {
+    set_qa_documents(newValue).then((response) => {
+      message.success("setting successfully");
+    });
+    appStore.setSelectedKeys(newValue);
+  }
 });
 
 onMounted(() => {

@@ -9,7 +9,7 @@ import {
   useLoadingBar,
   useMessage,
   useNotification,
-} from 'naive-ui'
+} from 'naive-ui';
 
 function registerNaiveTools() {
   window.$loadingBar = useLoadingBar()

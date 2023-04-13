@@ -181,7 +181,7 @@ async function onConversation() {
     };
 
     await fetchChatAPIOnce();
-  } catch (error) {
+  } catch (error: any) {
     const errorMessage = error?.message ?? t("common.wrong");
 
     if (error.message === "canceled") {
@@ -291,7 +291,7 @@ async function onRegenerate(index: number) {
       });
     };
     await fetchChatAPIOnce();
-  } catch (error) {
+  } catch (error: any) {
     if (error.message === "canceled") {
       updateChatSome(+uuid, index, {
         loading: false,
