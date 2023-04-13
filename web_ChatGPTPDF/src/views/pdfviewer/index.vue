@@ -34,6 +34,15 @@ export default defineComponent({
     const localPdf = reactive({ value: null });
     const canvases = ref([]);
 
+    const divStyle = computed(() => {
+      const div = this.$refs.pdf_viewer as HTMLElement;
+      if (div && div.offsetWidth >= 700) {
+        return { overflowX: "auto" };
+      } else {
+        return { overflowX: "hidden" };
+      }
+    });
+
     const loadPdf = async (pdf: any) => {
       console.log("pdf", pdf);
       pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -152,7 +161,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="pdf-viewer" id="pdf-viewer"></div>
+  <div ref="pdf_viewer" class="pdf-viewer" id="pdf-viewer"></div>
 </template>
 
 <style scoped>

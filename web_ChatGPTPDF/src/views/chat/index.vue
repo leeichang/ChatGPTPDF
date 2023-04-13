@@ -74,7 +74,7 @@ const startResize = (event: MouseEvent) => {
     const diffX = event.pageX - startX;
     leftWidth.value = startLeftWidth + (diffX / window.innerWidth) * 100;
     rightWidth.value = startRightWidth - (diffX / window.innerWidth) * 100;
-    pdfScale.value = (leftWidth.value / 50) ;
+    pdfScale.value = leftWidth.value / 50;
   };
 
   const onMouseUp = () => {
@@ -133,6 +133,9 @@ async function onConversation() {
   try {
     let lastText = "";
     const fetchChatAPIOnce = async () => {
+      console.log("message", message);
+      console.log("options", options);
+      console.log("signal", controller.signal);
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
         options,
@@ -463,7 +466,7 @@ onUnmounted(() => {
 
 <template>
   <div class="container" ref="containerRef">
-    <div class="left-div" :style="{ width: leftWidth + '%' }">
+    <div ref= "left_div" class="left-div" :style="{ width: leftWidth + '%' }">
       <PdfViewer ref="pdfViewer" :scale="pdfScale" />
     </div>
     <div

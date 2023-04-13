@@ -1,6 +1,6 @@
 import os
 from django.shortcuts import render
-
+from rest_framework.decorators import api_view
 from rest_framework import status,viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,6 +10,8 @@ from .serializers import ChatGPTPDFSerializer,ChatGPTPDFCreateUpdateSerializer
 from dvadmin.utils.viewset import CustomModelViewSet
 from rest_framework.authentication import BaseAuthentication
 from drf_yasg.utils import swagger_auto_schema
+# from .callback import QuestionGenCallbackHandler, StreamingLLMCallbackHandler
+
 import uuid
 class ChatGPTPDFViewSet(CustomModelViewSet):
     """
@@ -104,3 +106,48 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
         os.remove(file_path)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def question_handler(response):
+        # Define your own question handler callback here
+        # This example just returns the response as is
+        return response
+
+    def stream_handler(response):
+        # Define your own stream handler callback here
+        # This example just returns the response as is
+        return response
+    @action(detail=False, methods=['POST'])
+
+    def chat_process(self,request):
+        prompt = request.data.get('prompt')
+        options = request.data.get('options', {})
+        system_message = request.data.get('systemMessage')
+        selectedKeys = request.data.get('selectedKeys')
+
+        def process(chat):
+            nonlocal first_chunk
+            if first_chunk:
+                response = chat
+            else:
+                response = '\n' + chat
+            response = json.dumps(response)
+            response.streaming_content = (response,)
+            response['Content-Type'] = 'application/octet-stream'
+            return response
+
+        first_chunk = True
+        try:
+            response_data = ChatGPTPDF.chatReplyProcess({
+                'message': prompt,
+                'process': process,
+                'selectedKeys': selectedKeys,
+                'question_handler': self.question_handler,
+                'stream_handler': self.stream_handler,
+            })
+        except Exception as e:
+            return Response({'message': str(e)}, status=500)
+
+        std_data={
+            "status":"Success",
+            "text":response_data,
+        }
+        return Response(std_data,status=status.HTTP_200_OK)

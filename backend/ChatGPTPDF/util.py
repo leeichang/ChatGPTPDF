@@ -13,11 +13,13 @@ from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
 from langchain.vectorstores import Pinecone
 from langchain.prompts import PromptTemplate
+from langchain.chains.summarize import load_summarize_chain
 from openai.error import AuthenticationError
 from pypdf import PdfReader
 import openai
 from langchain.chat_models import ChatOpenAI
-from .embeddings import OpenAIEmbeddings
+# from .embeddings import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 import os
 import uuid
 import dotenv
@@ -307,6 +309,15 @@ def get_answer_pinecone(index: VectorStore, history: list[dict[str, str]], query
 
     return answer
 
+def get_answer_summary(docs: List[Document], query: str) -> Dict[str, Any]:
+    model = load_summarize_chain(llm=ChatOpenAI(
+            temperature=0,
+            openai_api_key=OPENAI_API_KEY,
+            max_tokens=500,
+            model_name="gpt-3.5-turbo",
+        ), chain_type="map_reduce")
+    model.run(docs)
+    return model
 
 def get_answer_qa(docs: List[Document], query: str) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
@@ -352,7 +363,7 @@ def get_answer(
         llm=ChatOpenAI(
             temperature=0,
             openai_api_key=OPENAI_API_KEY,
-            max_tokens=512,
+            max_tokens=500,
             model_name="gpt-3.5-turbo",
         ),
         vectorstore=index,
@@ -366,8 +377,24 @@ def get_answer(
     # chain = load_qa_with_sources_chain(
     #     Cohere(temperature=0), chain_type="stuff", prompt=STUFF_PROMPT  # type: ignore
     # )
+
+    new_history = []
+    humanMessage = ""
+    aiMessage = ""   
+    for message in history:
+        if message.type == "human" and humanMessage == "":
+            humanMessage = message.content
+        elif message.type == "ai" and aiMessage == "":
+            aiMessage = message.content
+        if humanMessage != "" and aiMessage != "":
+            new_message = { "Human":humanMessage,
+                            "AI":aiMessage }
+            new_history.append(new_message)
+            humanMessage = ""
+            aiMessage = ""
+
     answer = chain(
-        {"chat_history": history, "question": query}, return_only_outputs=True
+        {"chat_history": new_history, "question": query}, return_only_outputs=True
     )
 
     return answer
