@@ -1,34 +1,34 @@
-## 前端 Service♝
+# 前端 Service♝
 
-# 进入项目目录
+## 进入项目目录
 cd web_ChatGPTPDF/service
-# 編譯要安装依赖
+## 編譯要安装依赖
 yarn install
 
-# 編譯程式
+## 編譯程式
 yarn build 
 
-# 編譯後的程式在service/build 資料夾下
-# 正常除錯是启动服务
+## 編譯後的程式在service/build 資料夾下
+## 正常除錯是启动服务
 yarn run dev
 
-# 部署到正式環境要參考qrcode專案nodejs的部署方式
+## 部署到正式環境要參考qrcode專案nodejs的部署方式
 
-## 前端 Web♝`
-# 进入项目目录
+# 前端 Web♝`
+## 进入项目目录
 cd web_ChatGPTPDF
-# 編譯要安装依赖
+## 編譯要安装依赖
 yarn install
 
-# 修改 .env 對應正式環境的後端服務器地址 主要是修改 VITE_API_BASE_URL=http://localhost:8000/，這個是python的服務位置
-# 編譯程式
+## 修改 .env 對應正式環境的後端服務器地址 主要是修改 VITE_API_BASE_URL=http://localhost:8000/，這個是python的服務位置
+## 編譯程式
 yarn build 
 
-# 將dist資料夾下的所有檔案複製server發布資料夾上
+## 將dist資料夾下的所有檔案複製server發布資料夾上
 
-# 要設定nginx的設定檔，將所有的請求都導向到index.html，這樣才能讓vue-router正常運作，也要參考之前的vue專案設定vue-router的對應設定檔，這是對外的入口，service與python服務都不需要對外開放
+## 要設定nginx的設定檔，將所有的請求都導向到index.html，這樣才能讓vue-router正常運作，也要參考之前的vue專案設定vue-router的對應設定檔，這是對外的入口，service與python服務都不需要對外開放
 
-## 后端💈python
+# 后端💈python
 
 ~~~bash
 1. 进入项目目录 cd backend
