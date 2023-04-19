@@ -10,6 +10,11 @@ yarn install
 yarn build 
 
 ## 編譯後的程式在service/build 資料夾下
+
+## 編輯 .env 檔案
+copy .env.example to .env
+編輯 .env 加入 API KEY (OPENAI_API_KEY)
+
 ## 正常除錯是启动服务
 yarn run dev
 
