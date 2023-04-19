@@ -75,6 +75,39 @@ MIDDLEWARE = [
     "dvadmin.utils.middleware.ApiLoggingMiddleware",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:1002"
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Pragma'
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW'
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:1002"
+]
+
 ROOT_URLCONF = "application.urls"
 
 TEMPLATES = [

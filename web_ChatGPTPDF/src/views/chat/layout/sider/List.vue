@@ -5,6 +5,8 @@ import { SvgIcon } from '@/components/common'
 import { useAppStore, useChatStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { debounce } from '@/utils/functions/debounce'
+import { set_qa_documents } from "@/api/user";
+// import { useAppStoreWithOut } from "@/store";
 
 const { isMobile } = useBasicLayout()
 
@@ -46,7 +48,19 @@ function handleEnter({ uuid }: Chat.History, isEdit: boolean, event: KeyboardEve
 }
 
 function isActive(uuid: number) {
-  return chatStore.active === uuid
+  let active:boolean = (chatStore.active === uuid)
+	if(active){
+		const chatIndex = chatStore.chat.findIndex((item) => item.uuid === chatStore.active);
+		if (chatIndex !== -1) {
+			let id:number = chatStore.chat[chatIndex].pdfFileId;
+
+			set_qa_documents(id).then((response) => {
+				console.log(response);
+			});
+			appStore.setSelectedKeys(id);
+		}
+	}
+	return active;
 }
 </script>
 

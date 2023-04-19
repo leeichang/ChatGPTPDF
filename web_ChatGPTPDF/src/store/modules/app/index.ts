@@ -22,11 +22,11 @@ export const useAppStore = defineStore("app-store", {
         this.recordState();
       }
     },
-    setSelectedKeys(selectedKeys: string[]) {
-      if (this.selectedKeys !== selectedKeys) {
+    setSelectedKeys(selectedKeys: number[]|number) {
+      //if (this.selectedKeys !== selectedKeys) {
         this.selectedKeys = selectedKeys;
         this.recordState();
-      }
+      //}
     },
     setPdf(pdf: File) {
 			console.log("setPdf: " , pdf);

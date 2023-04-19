@@ -26,6 +26,9 @@ export default {
     failed: '操作失敗',
     verify: '驗證',
     unauthorizedTips: '未經授權，請先進行驗證。',
+		upload_success: "上傳成功",
+		Drog_Drop_File_Here: "拖拽文件到此處 或 點擊上傳",
+		processing: "處理中",
   },
   chat: {
     newChatButton: '新建對話',

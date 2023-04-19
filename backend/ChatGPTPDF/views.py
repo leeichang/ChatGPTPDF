@@ -28,6 +28,13 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
 
     authentication_classes = []
     permission_classes = []
+
+    ###
+    #處理cors問題
+    ###
+    @api_view(['OPTIONS'])
+    def preflight(self, request):
+        return Response(status=status.HTTP_200_OK)
     # def get_authenticators(self):
     #     """
     #     Get the list of authenticators used for this viewset.
@@ -52,7 +59,7 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
     
     @action(detail=False, methods=['POST'])
     def perform_create(self, serializer):
-        file = self.request.data['file']
+        file = self.request.FILES['file']
         file_uuid = uuid.uuid4()
         file_name, file_extension = os.path.splitext(file.name)
         file_name = file_name + '_' +str(file_uuid)+file_extension
@@ -64,18 +71,24 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
             for chunk in file.chunks():
                 destination.write(chunk)
 
-        ChatGPTPDF.objects.create(
+        new_obj = ChatGPTPDF.objects.create(
             file_name=file_name,
             file_size=file_size,
             file_path=file_path,
             file_uuid =file_uuid,
             creator_id= 1,
         )
+        new_obj_id = new_obj.id
+
         ChatGPTPDF.handleFileIndex(file_path,file_uuid)
         obj = ChatGPTPDF.objects.get(file_uuid=file_uuid)
         obj.indexed = True
         obj.save()
-        return Response(status=status.HTTP_201_CREATED)
+        std_data={
+            "status":"Success",
+            "id":new_obj_id,
+        }
+        return Response(std_data,status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['GET'])
     def my_files(self, request):

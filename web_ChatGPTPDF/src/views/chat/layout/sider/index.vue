@@ -2,47 +2,35 @@
 import type { CSSProperties } from "vue";
 import { computed, ref, watch, onMounted } from "vue";
 import {
-  NButton,
-  NIcon,
   NLayoutSider,
-  NSelect,
   NSpace,
-  NText,
-  NUpload,
-  NUploadDragger,
-  UploadFileInfo,
-  useMessage,
+  // useMessage,
 } from "naive-ui";
-import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 import List from "./List.vue";
-import Footer from "./Footer.vue";
+// import Footer from "./Footer.vue";
 import { useAppStore, useChatStore } from "@/store";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
-import { PromptStore } from "@/components/common";
-import { getMyFiles, set_qa_documents } from "@/api/user";
+// import { PromptStore } from "@/components/common";
+import { getMyFiles } from "@/api/user";
 import { options } from "@/typings/global";
+import FileUploader from "@/components/Upload/FileUploader.vue";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const UploadUrl = `${API_BASE_URL}api/ChatGPTPDF/File/perform_create/`;
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const UploadUrl = `${API_BASE_URL}api/ChatGPTPDF/File/perform_create/`;
 const appStore = useAppStore();
 const chatStore = useChatStore();
 
 const { isMobile } = useBasicLayout();
-const show = ref(false);
+// const show = ref(false);
 
 const collapsed = computed(() => appStore.siderCollapsed);
 
-const selected_pdf_ids = ref([]);
+// const selected_pdf_ids = ref([]);
 const options = ref<options[]>([]);
 
-const message = useMessage();
-const uploadRef = ref(null);
-const fileList = ref([]);
-
-function handleAdd() {
-  chatStore.addHistory({ title: "New Chat", uuid: Date.now(), isEdit: false });
-  if (isMobile.value) appStore.setSiderCollapsed(true);
-}
+// const message = useMessage();
+// const uploadRef = ref(null);
+// const fileList = ref([]);
 
 function handleUpdateCollapsed() {
   appStore.setSiderCollapsed(!collapsed.value);
@@ -89,31 +77,10 @@ async function fetchData() {
   }
 }
 
-// const handleSelectChange = () => {
-//   const value = selected_pdf_ids.value;
-//   set_qa_documents(value).then((response) => {
-//     message.success("setting successfully");
-//   });
-//   if (isArray(value)) {
-//     this.$refs.pdfViewer.downloadfile(value[0]);
-//   } else {
-//     this.$refs.pdfViewer.downloadfile(value);
-//   }
-// };
-
-const handleFinish = ({
-  file,
-  event,
-}: {
-  file: UploadFileInfo;
-  event?: ProgressEvent;
-}) => {
-  message.success("Upload successfully");
-  fetchData();
-  set_qa_documents(selected_pdf_ids.value).then((response) => {
-    message.success("setting successfully");
-  });
-  appStore.setSelectedKeys(selected_pdf_ids.value);
+function handleHistoryAdd(object:{id:number,name:string}) {
+  chatStore.addHistory({ title: object.name, uuid: Date.now(), isEdit: false},[],object.id, object.name)
+  if (isMobile.value)
+    appStore.setSiderCollapsed(true)
 };
 
 watch(
@@ -127,14 +94,6 @@ watch(
   }
 );
 
-watch(selected_pdf_ids, (newValue) => {
-  if (newValue.length > 0) {
-    set_qa_documents(newValue).then((response) => {
-      message.success("setting successfully");
-    });
-    appStore.setSelectedKeys(newValue);
-  }
-});
 
 onMounted(() => {
   fetchData();
@@ -155,63 +114,41 @@ onMounted(() => {
   >
     <div class="flex flex-col h-full" :style="mobileSafeArea">
       <main class="flex flex-col flex-1 min-h-0">
-        <div class="p-4">
-          <NButton dashed block @click="handleAdd">
-            {{ $t("chat.newChatButton") }}
-          </NButton>
-        </div>
-        <div class="flex-1 min-h-0 pb-4 overflow-hidden">
-          <List />
-        </div>
-        <div>
-          <NSpace vertical>
-            <NSelect
-              v-model:value="selected_pdf_ids"
-              multiple
-              filterable
-              :options="options"
-              :consistent-menu-width="false"
-              placeholder="PDF to Q&A or talk to ChatGPT"
-            />
-            <!-- <NTooltip>
-              <template #trigger> -->
-            <NUpload
-              ref="uploadRef"
-              v-model:fileList="fileList"
-              multiple
-              directory-dnd
-              :action="UploadUrl"
-              :max="5"
-              style="height: 170px;"
-              @finish="handleFinish"
-            >
-              <NUploadDragger style="height: 125px;">
-                <div style="margin-bottom: 5px;">
-                  <NIcon size="36" :depth="3">
-                    <ArchiveIcon />
-                  </NIcon>
-                </div>
-                <NText style="font-size: 14px;">
-                  Click or drag a file to this area to upload Q&A PDF file
-                </NText>
-              </NUploadDragger>
-            </NUpload>
-            <!-- </template>
-              <span
-                >Uploading sensitive information is strictly prohibited. For
-                example For example, customers providing production-related
-                information, financial information, R&D information</span
-              >
-            </NTooltip> -->
-          </NSpace>
-        </div>
+        <NSpace vertical>
+					<FileUploader @historyAdd ="handleHistoryAdd"/>
+          <!-- <NUpload
+            ref="uploadRef"
+            v-model:fileList="fileList"
+            multiple
+            directory-dnd
+            :action="UploadUrl"
+            :max="5"
+            style="height: 170px;"
+            @finish="handleFinish"
+          >
+            <NUploadDragger style="height: 125px;">
+              <div style="margin-bottom: 5px;">
+                <NIcon size="36" :depth="3">
+                  <ArchiveIcon />
+                </NIcon>
+              </div>
+              <NText style="font-size: 14px;">
+                Click or drag a file to this area to upload Q&A PDF file
+              </NText>
+            </NUploadDragger>
+          </NUpload> -->
+          <div class="flex-1 min-h-0 pb-4 overflow-hidden">
+            <List />
+          </div>
+        </NSpace>
+
         <!-- <div class="p-4">
           <NButton block @click="show = true">
             {{ $t("store.siderButton") }}
           </NButton>
         </div> -->
       </main>
-      <Footer />
+      <!-- <Footer /> -->
     </div>
   </NLayoutSider>
   <template v-if="isMobile">
@@ -221,5 +158,5 @@ onMounted(() => {
       @click="handleUpdateCollapsed"
     />
   </template>
-  <PromptStore v-model:visible="show" />
+  <!-- <PromptStore v-model:visible="show" /> -->
 </template>

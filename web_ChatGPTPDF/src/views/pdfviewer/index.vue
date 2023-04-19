@@ -44,7 +44,11 @@ export default defineComponent({
       console.log("pdf", pdf);
       pdfjsLib.GlobalWorkerOptions.workerSrc =
         "../../../node_modules/pdfjs-dist/build/pdf.worker.js";
-      if (pdf === undefined) {
+      if (pdf === undefined||pdf === null) {
+				const canvasElements = document.querySelectorAll(".pdf-page-canvas");
+        canvasElements.forEach((canvasElement) => {
+          canvasElement.parentNode?.removeChild(canvasElement);
+        });
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc) {
           thePdf = pdfDoc;
           viewer.value = document.getElementById("pdf-viewer")!;
@@ -142,6 +146,8 @@ export default defineComponent({
     });
 
     watch(selectedKeys, (newVal) => {
+			if (newVal === undefined)
+				return;
       if (isArray(newVal)) {
         downloadfile(Number(newVal[0]));
       } else {

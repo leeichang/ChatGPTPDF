@@ -26,6 +26,9 @@ export default {
     failed: 'Failed',
     verify: 'Verify',
     unauthorizedTips: 'Unauthorized, please verify first.',
+		upload_success: "Upload Success",
+		Drog_Drop_File_Here: "Drag and drop files here or click to upload",
+		processing: "Processing",
   },
   chat: {
     newChatButton: 'New Chat',

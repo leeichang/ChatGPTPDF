@@ -33,6 +33,7 @@ from dvadmin.system.views.login import (
 )
 from dvadmin.system.views.system_config import InitSettingsViewSet
 from dvadmin.utils.swagger import CustomOpenAPISchemaGenerator
+from ChatGPTPDF.views import ChatGPTPDFViewSet
 
 # =========== 初始化系统配置 =================
 dispatch.init_system_config()
@@ -81,7 +82,8 @@ urlpatterns = (
             path("api/init/dictionary/", InitDictionaryViewSet.as_view()),
             path("api/init/settings/", InitSettingsViewSet.as_view()),
             path("apiLogin/", ApiLogin.as_view()),
-            path("api/ChatGPTPDF/",include('ChatGPTPDF.urls'))
+            path("api/ChatGPTPDF/",include('ChatGPTPDF.urls')),
+            path('api/ChatGPTPDF/preflight/', ChatGPTPDFViewSet.preflight, name='preflight'),
         ]
         + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
         + static(settings.STATIC_URL, document_root=settings.STATIC_URL)

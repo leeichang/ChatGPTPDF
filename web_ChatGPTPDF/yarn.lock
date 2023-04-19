@@ -6274,6 +6274,11 @@ vue-tsc@^1.2.0:
     "@volar/vue-language-core" "1.2.0"
     "@volar/vue-typescript" "1.2.0"
 
+vue3-loading-overlay@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/vue3-loading-overlay/-/vue3-loading-overlay-0.0.0.tgz#b5c726b51114019c1771479f7558af1fb1e73f6e"
+  integrity sha512-Ly/sOMF+YTPDlVSsL4D8dTasT9A/PW+JlhFaY+sabOJXpafedxD1ADZbpT89XaM2QavRzfmq4s0nhcbr5I7BRQ==
+
 vue@^3.2.47:
   version "3.2.47"
   resolved "https://registry.npmjs.org/vue/-/vue-3.2.47.tgz"

@@ -9,7 +9,7 @@ export interface AppState {
   siderCollapsed: boolean;
   theme: Theme;
   language: Language;
-  selectedKeys: string[];
+  selectedKeys: number[]|number;
   pdf: File | null;
 }
 

@@ -1,5 +1,4 @@
 declare namespace Chat {
-
 	interface Chat {
 		dateTime: string
 		text: string
@@ -20,7 +19,7 @@ declare namespace Chat {
 		active: number | null
 		usingContext: boolean;
 		history: History[]
-		chat: { uuid: number; data: Chat[] }[]
+		chat: { uuid: number; data: Chat[]; pdfFileId: number; pdfFileName:string }[]
 	}
 
 	interface ConversationRequest {
@@ -38,6 +37,7 @@ declare namespace Chat {
 			object: string
 			usage: { completion_tokens: number; prompt_tokens: number; total_tokens: number }
 		}
+
 		id: string
 		parentMessageId: string
 		role: string
