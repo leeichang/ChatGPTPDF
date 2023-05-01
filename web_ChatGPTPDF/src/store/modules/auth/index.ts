@@ -31,8 +31,7 @@ export const useAuthStore = defineStore('auth-store', {
         const { data } = await fetchSession<SessionResponse>()
         this.session = { ...data }
         return Promise.resolve(data)
-      }
-      catch (error) {
+      } catch (error:any) {
         return Promise.reject(error)
       }
     },

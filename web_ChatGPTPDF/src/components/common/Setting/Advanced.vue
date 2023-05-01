@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { NButton, NInput, useMessage } from 'naive-ui'
 import { useSettingStore } from '@/store'
 import type { SettingsState } from '@/store/modules/settings/helper'
 import { t } from '@/locales'
+import { ref } from 'vue';
 
 const settingStore = useSettingStore()
 

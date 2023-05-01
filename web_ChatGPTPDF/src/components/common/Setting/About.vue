@@ -1,9 +1,10 @@
 <script setup lang='ts'>
-import { computed, onMounted, ref } from 'vue'
 import { NSpin } from 'naive-ui'
 import { fetchChatConfig } from '@/api'
 import pkg from '@/../package.json'
 import { useAuthStore } from '@/store'
+
+import { computed, onMounted, ref } from 'vue';
 
 interface ConfigState {
   timeoutMs?: number
@@ -18,7 +19,7 @@ const authStore = useAuthStore()
 
 const loading = ref(false)
 
-const config = ref<ConfigState>()
+const config = ref<ConfigState>({} as ConfigState);
 
 const isChatGPTAPI = computed<boolean>(() => !!authStore.isChatGPTAPI)
 

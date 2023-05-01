@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FreeFileSync XmlType="GUI" XmlFormat="17">
+    <Compare>
+        <Variant>Content</Variant>
+        <Symlinks>Exclude</Symlinks>
+        <IgnoreTimeShift/>
+    </Compare>
+    <Synchronize>
+        <Variant>Mirror</Variant>
+        <DetectMovedFiles>false</DetectMovedFiles>
+        <DeletionPolicy>RecycleBin</DeletionPolicy>
+        <VersioningFolder Style="Replace"/>
+    </Synchronize>
+    <Filter>
+        <Include>
+            <Item>*</Item>
+        </Include>
+        <Exclude>
+            <Item>*.pyc</Item>
+            <Item>*/._*</Item>
+            <Item>*/.DocumentRevisions-V100/</Item>
+            <Item>*/.DS_Store</Item>
+            <Item>*/.fseventsd/</Item>
+            <Item>*/.Spotlight-V100/</Item>
+            <Item>*/.TemporaryItems/</Item>
+            <Item>*/.Trashes/</Item>
+            <Item>*/.node_modules/</Item>
+            <Item>*/.git/</Item>
+            <Item>*/bin/</Item>
+            <Item>*/obj/</Item>
+            <Item>*/babel-loader/</Item>
+            <Item>*/.vs/</Item>
+            <Item>*/node_modules/</Item>
+            <Item>*/venv/</Item>
+            <Item>*/logs/</Item>
+        </Exclude>
+        <SizeMin Unit="None">0</SizeMin>
+        <SizeMax Unit="None">0</SizeMax>
+        <TimeSpan Type="None">0</TimeSpan>
+    </Filter>
+    <FolderPairs>
+        <Pair>
+            <Left>/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/backend</Left>
+            <Right>/Volumes/Lee_Mac/Home/Lee_Documents/python_deploy/chatgptpdf</Right>
+        </Pair>
+    </FolderPairs>
+    <Errors Ignore="false" Retry="0" Delay="5"/>
+    <PostSyncCommand Condition="Completion"/>
+    <LogFolder/>
+    <EmailNotification Condition="Always"/>
+    <Gui>
+        <GridViewType>Difference</GridViewType>
+    </Gui>
+</FreeFileSync>

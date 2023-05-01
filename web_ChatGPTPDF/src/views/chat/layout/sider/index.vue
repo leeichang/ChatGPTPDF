@@ -14,6 +14,8 @@ import { useBasicLayout } from "@/hooks/useBasicLayout";
 import { getMyFiles } from "@/api/user";
 import { options } from "@/typings/global";
 import FileUploader from "@/components/Upload/FileUploader.vue";
+import { useChat } from "@/views/chat/hooks/useChat";
+import { useScroll } from "@/views/chat/hooks/useScroll";
 
 //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // const UploadUrl = `${API_BASE_URL}api/ChatGPTPDF/File/perform_create/`;
@@ -31,6 +33,12 @@ const options = ref<options[]>([]);
 // const message = useMessage();
 // const uploadRef = ref(null);
 // const fileList = ref([]);
+
+const { scrollToBottom } = useScroll();
+
+		const {
+			addChat,
+		} = useChat();
 
 function handleUpdateCollapsed() {
   appStore.setSiderCollapsed(!collapsed.value);
@@ -72,14 +80,27 @@ async function fetchData() {
         label: newName,
       });
     });
-  } catch (error) {
+  } catch (error:any) {
     console.error("Failed to fetch data:", error);
   }
 }
 
-function handleHistoryAdd(object:{id:number,name:string}) {
-  chatStore.addHistory({ title: object.name, uuid: Date.now(), isEdit: false},[],object.id, object.name)
-  if (isMobile.value)
+function handleHistoryAdd(object:{id:number,name:string,text:string}) {
+	let uuid = Date.now()
+  chatStore.addHistory({ title: object.name, uuid: uuid , isEdit: false},[],object.id, object.name)
+	let options: Chat.ConversationRequest = {};
+
+
+	addChat(+uuid, {
+						dateTime: new Date().toLocaleString(),
+						text: object.text,
+						inversion: false,
+						error: false,
+						conversationOptions: null,
+						requestOptions: { prompt: "", options: { ...options } },
+					});
+					scrollToBottom();
+	if (isMobile.value)
     appStore.setSiderCollapsed(true)
 };
 

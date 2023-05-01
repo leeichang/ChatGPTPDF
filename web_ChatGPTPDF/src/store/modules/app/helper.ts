@@ -17,7 +17,7 @@ export function defaultSetting(): AppState {
   return {
     siderCollapsed: false,
     theme: "light",
-    language: "zh-CN",
+    language: "zh-TW",
     selectedKeys: [],
     pdf: null,
   };

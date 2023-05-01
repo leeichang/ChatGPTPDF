@@ -173,7 +173,7 @@ async function onConversation() {
             }
 
             scrollToBottom();
-          } catch (error) {
+          } catch (error:any) {
             //
           }
         },
@@ -284,7 +284,7 @@ async function onRegenerate(index: number) {
               message = "";
               return fetchChatAPIOnce();
             }
-          } catch (error) {
+          } catch (error:any) {
             //
           }
         },
@@ -345,7 +345,7 @@ function handleExport() {
         d.loading = false;
         ms.success(t("chat.exportSuccess"));
         Promise.resolve();
-      } catch (error) {
+      } catch (error:any) {
         ms.error(t("chat.exportFailed"));
       } finally {
         d.loading = false;
@@ -368,19 +368,19 @@ function handleDelete(index: number) {
   });
 }
 
-function handleClear() {
-  if (loading.value) return;
+// function handleClear() {
+//   if (loading.value) return;
 
-  dialog.warning({
-    title: t("chat.clearChat"),
-    content: t("chat.clearChatConfirm"),
-    positiveText: t("common.yes"),
-    negativeText: t("common.no"),
-    onPositiveClick: () => {
-      chatStore.clearChatByUuid(+uuid);
-    },
-  });
-}
+//   dialog.warning({
+//     title: t("chat.clearChat"),
+//     content: t("chat.clearChatConfirm"),
+//     positiveText: t("common.yes"),
+//     negativeText: t("common.no"),
+//     onPositiveClick: () => {
+//       chatStore.clearChatByUuid(+uuid);
+//     },
+//   });
+// }
 
 function handleEnter(event: KeyboardEvent) {
   if (!isMobile.value) {
@@ -531,17 +531,17 @@ onUnmounted(() => {
         <footer :class="footerClass">
           <div class="w-full max-w-screen-xl m-auto">
             <div class="flex items-center justify-between space-x-2">
-              <HoverButton @click="handleClear">
+              <!-- <HoverButton @click="handleClear">
                 <span class="text-xl text-[#4f555e] dark:text-white">
                   <SvgIcon icon="ri:delete-bin-line" />
                 </span>
-              </HoverButton>
+              </HoverButton> -->
               <HoverButton v-if="!isMobile" @click="handleExport">
                 <span class="text-xl text-[#4f555e] dark:text-white">
                   <SvgIcon icon="ri:download-2-line" />
                 </span>
               </HoverButton>
-              <HoverButton v-if="!isMobile" @click="toggleUsingContext">
+              <!-- <HoverButton v-if="!isMobile" @click="toggleUsingContext">
                 <span
                   class="text-xl"
                   :class="{
@@ -551,7 +551,7 @@ onUnmounted(() => {
                 >
                   <SvgIcon icon="ri:chat-history-line" />
                 </span>
-              </HoverButton>
+              </HoverButton> -->
               <NAutoComplete
                 v-model:value="prompt"
                 :options="searchOptions"

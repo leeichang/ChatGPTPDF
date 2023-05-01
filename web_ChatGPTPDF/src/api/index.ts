@@ -2,7 +2,8 @@ import type { AxiosProgressEvent, GenericAbortSignal } from "axios";
 import { post } from "@/utils/request";
 import { useAppStore, useSettingStore } from "@/store";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_APP_URL = import.meta.env.VITE_APP_URL;
 
 export function fetchChatAPI<T = any>(
   prompt: string,
@@ -31,7 +32,7 @@ export function fetchChatAPIProcess<T = any>(params: {
   const settingStore = useSettingStore();
   const appStore = useAppStore();
   return post<T>({
-    url: `${API_BASE_URL}api/ChatGPTPDF/File/chat_process/`,
+    url: `${API_APP_URL}api/ChatGPTPDF/File/chat_process/`,
     data: {
       prompt: params.prompt,
       options: params.options,
@@ -51,13 +52,13 @@ export function fetchChatAPIProcess<T = any>(params: {
 
 export function fetchSession<T>() {
   return post<T>({
-    url: "/session",
+    url: `${API_APP_URL}api/session/`,
   });
 }
 
 export function fetchVerify<T>(token: string) {
   return post<T>({
-    url: "/verify",
+    url: `${API_APP_URL}/verify`,
     data: { token },
   });
 }

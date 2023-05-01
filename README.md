@@ -49,7 +49,12 @@ FILE_INDEX_DIR  =目前是設定專案的根目錄的index資料夾，後續要�
 	pip3 install -r requirements.txt
 5. 启动项目
 	在backend目录下执行 uwsgi --ini ChatGPTPDF_uwsgi.ini 這個要設定成開機自動執行
+
+                      daphne -b 0.0.0.0 -p 8000 application.asgi:application
+
 6. ChatGPTPDF_uwsgi.ini 設定檔 包含同時可以處理的執行序數量(workers)與log檔案位置(daemonize) 這兩個要配合環境設定
 ~~~
 
-
+On Mac
+brew services restart nginx
+brew services restart postgresql@14

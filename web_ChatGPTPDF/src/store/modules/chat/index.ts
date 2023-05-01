@@ -18,7 +18,7 @@ export const useChatStore = defineStore("chat-store", {
         if (uuid)
           return state.chat.find((item) => item.uuid === uuid)?.data ?? [];
         return (
-          state.chat.find((item) => item.uuid === state.active)?.data ?? []
+					state.chat?state.chat.find((item) => item.uuid === state.active)?.data ?? []:[]
         );
       };
     },

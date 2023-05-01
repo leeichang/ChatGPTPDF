@@ -22,7 +22,7 @@ export default defineComponent({
   setup(props) {
     const pdfPages = ref<HTMLDivElement | null>(null);
     const pages = ref<number[]>([]);
-    const url = "sample.pdf";
+    const url = "";
     let thePdf:pdfjsLib.PDFDocumentProxy;
     const viewer = ref<HTMLElement>(document.createElement('div'));
 		const pdf = ref<File>(new File([], ""));
@@ -128,7 +128,12 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      loadPdf();
+			var id = userStore.selectedKeys;
+			if(isArray(id)){
+				downloadfile(id[0]);
+			}else{
+				downloadfile(id);
+			}
     });
 
     watch(

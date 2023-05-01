@@ -1,5 +1,4 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
 import { NDropdown } from 'naive-ui'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
@@ -8,6 +7,7 @@ import { copyText } from '@/utils/format'
 import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { computed, ref } from 'vue'
 
 interface Props {
   dateTime?: string

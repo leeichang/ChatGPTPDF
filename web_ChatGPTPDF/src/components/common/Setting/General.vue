@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { NButton, NInput, NPopconfirm, NSelect, useMessage } from 'naive-ui'
 import type { Language, Theme } from '@/store/modules/app/helper'
 import { SvgIcon } from '@/components/common'
@@ -8,6 +7,7 @@ import type { UserInfo } from '@/store/modules/user/helper'
 import { getCurrentDate } from '@/utils/functions'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { t } from '@/locales'
+import { computed, ref } from 'vue'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
@@ -101,7 +101,7 @@ function importData(event: Event): void {
       ms.success(t('common.success'))
       location.reload()
     }
-    catch (error) {
+    catch (error:any) {
       ms.error(t('common.invalidFileFormat'))
     }
   }

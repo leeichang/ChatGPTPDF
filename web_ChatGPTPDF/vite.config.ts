@@ -3,7 +3,26 @@ import type { ConfigEnv, PluginOption } from "vite";
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
-import CompressionPlugin from 'vite-plugin-compression';
+import CompressionPlugin from "vite-plugin-compression";
+import visualizer from "rollup-plugin-visualizer";
+import externalGlobals from "rollup-plugin-external-globals";
+
+let globals = externalGlobals({
+  vue: "Vue",
+  "vue-demi": "VueDemi",
+  axios: "axios",
+  "vue-i18n": "VueI18n",
+  "vue-router": "VueRouter",
+  //"naive-ui": "naive-ui",
+  lodash: "_",
+  //pinia: "pinia",
+  html2canvas: "html2canvas",
+  katex: "katex",
+  "pdfjs-dist": "pdfjsLib",
+  "highlight.js": "highlight.js",
+  //"markdown-it": "markdown-it",
+  "crypto-js": "crypto-js",
+});
 
 function setupPlugins(env: ImportMetaEnv): PluginOption[] {
   return [
@@ -23,6 +42,24 @@ function setupPlugins(env: ImportMetaEnv): PluginOption[] {
   ];
 }
 
+// function setupPlugins(env: ImportMetaEnv): PluginOption[] {
+//   return [
+//     vue(),
+//     env.VITE_GLOB_APP_PWA === "true" &&
+//       VitePWA({
+//         injectRegister: "auto",
+//         manifest: {
+//           name: "chatGPT",
+//           short_name: "chatGPT",
+//           icons: [
+//             { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
+//             { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
+//           ],
+//         },
+//       }),
+//   ];
+// }
+
 // interface ConfigEnv {
 //   [key: string]: string;
 // }
@@ -40,6 +77,7 @@ export default defineConfig((env: ConfigEnv) => {
       },
     },
     plugins: [
+      visualizer() as PluginOption,
       setupPlugins(viteEnv),
       CompressionPlugin({
         algorithm: "gzip",
@@ -52,19 +90,34 @@ export default defineConfig((env: ConfigEnv) => {
       open: false,
       proxy: {
         "/api": {
-          target: viteEnv.VITE_APP_API_BASE_URL,
+          target: viteEnv.VITE_API_BASE_URL,
           changeOrigin: true, // 允许跨域
           rewrite: (path) => path.replace("/api/", "/"),
         },
       },
     },
     build: {
-      // rollupOptions: {
-      // 	plugins: [
-      // 		// 在生產環境下使用 terser 壓縮代碼
-      // 		viteEnv.VITE_NODE_ENV === 'production' && terser(),
-      // 	],
-      // },
+      rollupOptions: {
+        // 忽略打包
+        external: [
+          "vue",
+          "vue-demi",
+          "axios",
+          "vue-i18n",
+          //"pinia",
+          "vue-router",
+          //"naive-ui",
+          "lodash",
+          "html2canvas",
+          "katex",
+          "pdfjs-dist",
+          "highlight.js",
+					"crypto-js",
+					//"markdown-it"
+        ],
+        plugins: [globals as PluginOption],
+      },
+
       reportCompressedSize: true,
       sourcemap: false,
       commonjsOptions: {

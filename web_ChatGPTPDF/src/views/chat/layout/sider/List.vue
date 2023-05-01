@@ -1,5 +1,4 @@
 <script setup lang='ts'>
-import { computed } from 'vue'
 import { NInput, NPopconfirm, NScrollbar } from 'naive-ui'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useChatStore } from '@/store'
@@ -7,6 +6,7 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { debounce } from '@/utils/functions/debounce'
 import { set_qa_documents } from "@/api/user";
 // import { useAppStoreWithOut } from "@/store";
+import { computed } from 'vue'
 
 const { isMobile } = useBasicLayout()
 
@@ -67,7 +67,7 @@ function isActive(uuid: number) {
 <template>
   <NScrollbar class="px-4">
     <div class="flex flex-col gap-2 text-sm">
-      <template v-if="!dataSources.length">
+      <template v-if="dataSources===undefined ||!dataSources.length">
         <div class="flex flex-col items-center mt-4 text-center text-neutral-300">
           <SvgIcon icon="ri:inbox-line" class="mb-2 text-3xl" />
           <span>{{ $t('common.noData') }}</span>

@@ -46,10 +46,14 @@ function http<T = any>(
   method = method || 'GET'
 
   const params = Object.assign(typeof data === 'function' ? data() : data ?? {}, {})
+  // var serverUrl = import.meta.env.VITE_APP_API_BASE_URL
+	// if(url.startsWith("http")){
+	// 	serverUrl = "";
+	// }
 
   return method === 'GET'
     ? request.get(url, { params, signal, onDownloadProgress }).then(successHandler, failHandler)
-    : request.post(url, params, { headers, signal, onDownloadProgress }).then(successHandler, failHandler)
+    : request.post( url, params, { headers, signal, onDownloadProgress }).then(successHandler, failHandler)
 }
 
 export function get<T = any>(

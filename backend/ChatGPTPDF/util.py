@@ -25,7 +25,8 @@ import uuid
 import dotenv
 import pinecone
 from application import settings
-
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+from requests.exceptions import ConnectionError
 # loading the .env file
 dotenv.load_dotenv()
 
@@ -66,7 +67,7 @@ QA_PROMPT = PromptTemplate.from_template(
     ---------
     Question: {question}\n 
     =========\n{context}\n=========\n 
-    Answer in Markdown in Chinese:"""
+    Answer in Markdown in Traditional Chinese:"""
 )
 
 ## Use a shorter template to reduce the number of tokens in the prompt
@@ -101,7 +102,7 @@ STUFF_PROMPT = PromptTemplate(
 template2 = """Create a final answer to the given questions using the provided document excerpts(in no particular order) as references. 
         ALWAYS include a "SOURCES" section in your answer including only the minimal set of sources needed to answer the question. 
         If you are unable to answer the question, simply state that you do not know. Do not attempt to fabricate an answer and leave the SOURCES section empty.
-Answer in Chinese
+Answer in Traditional Chinese:
 ---------
 QUESTION: {question}
 =========
@@ -115,7 +116,7 @@ STUFF_PROMPT2 = PromptTemplate(
 
 template3 = """Create a final answer to the given questions using the provided document excerpts(in no particular order) as references. 
               If you are unable to answer the question, simply state that you do not know. Do not attempt to fabricate an answer .
-Answer in Chinese
+Answer in Traditional Chinese:
 ---------
 QUESTION: {question}
 =========
@@ -184,6 +185,15 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
     return doc_chunks
 
+# 使用 tenacity 進行重試
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(2), retry=retry_if_exception_type(ConnectionError))
+def FAISSFromDocuments(docs: List[Document], embeddings: OpenAIEmbeddings) -> FAISS:
+    """Creates a FAISS index from a list of Documents"""
+
+    # Create a FAISS index
+    index = FAISS.from_documents(docs, embeddings)
+    # print(index)
+    return index
 
 def embed_docs(docs: List[Document], uuid: str | None) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
@@ -199,16 +209,17 @@ def embed_docs(docs: List[Document], uuid: str | None) -> VectorStore:
             " https://platform.openai.com/account/api-keys."
         )
     else:
-        # Embed the chunks
-        embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)  # type: ignore
-        index = FAISS.from_documents(docs, embeddings)
-        # print(index)
-        # Save the index
-        index_path = f"{settings.INDEX_ROOT}/{uuid}"
-        index.save_local(folder_path=index_path)
-
-        return index
-
+        try:
+            # Embed the chunks
+            embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)  # type: ignore
+            index = FAISSFromDocuments(docs,embeddings)
+            # print(index)
+            # Save the index
+            index_path = f"{settings.INDEX_ROOT}/{uuid}"
+            index.save_local(folder_path=index_path)
+            return index
+        except Exception as e:
+            print("重試失敗:", e)
 
 def pinecone_embed_docs(docs: List[Document], uuid: str | None = None) -> str:
     """Embeds a list of Documents and returns the ID of the Pinecone index"""
@@ -431,3 +442,16 @@ def get_sources_qa(answer: Dict[str, Any], docs: List[Document]) -> List[Documen
             source_docs.append(doc.metadata["source"])
 
     return source_docs
+
+def openai_chat(input):
+    messages = [
+    {"role": "system", "content": "You are a helpful and kind AI Assistant."},
+]
+    if input:
+        messages.append({"role": "user", "content": input})
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages= messages,
+            temperature=0, max_tokens=2048 
+        )
+        reply = chat.choices[0]["message"]["content"]
+        return reply

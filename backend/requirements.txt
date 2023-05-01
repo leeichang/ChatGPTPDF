@@ -23,6 +23,7 @@ dataclasses-json==0.5.7
 Django==3.2.12
 django-comment-migrate==0.1.7
 django-cors-headers==3.10.1
+django-dbbackup==4.0.2
 django-filter==22.1
 django-ranged-response==0.2.0
 django-restql==0.15.3
@@ -63,6 +64,7 @@ openpyxl==3.1.2
 packaging==23.0
 Pillow==9.4.0
 pinecone-client==2.2.1
+psycopg2-binary==2.9.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
@@ -96,7 +98,7 @@ typing_extensions==4.5.0
 tzlocal==2.1
 ua-parser==0.10.0
 uritemplate==3.0.1
-urllib3==1.26.15
+urllib3==1.25.11
 user-agents==2.2.0
 uvicorn==0.21.1
 uWSGI==2.0.21

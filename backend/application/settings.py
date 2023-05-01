@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "captcha",
     'channels',
     'ChatGPTPDF',
+    'dbbackup',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +77,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:1002"
+    "http://localhost:1002",
+    "http://localhost",
+    "http://192.168.10.168:1002"
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -105,7 +108,9 @@ CORS_ALLOW_METHODS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:1002"
+    "http://localhost:1002",
+    "http://localhost",
+    "http://192.168.10.168:1002"
 ]
 
 ROOT_URLCONF = "application.urls"
@@ -144,6 +149,8 @@ DATABASES = {
 AUTH_USER_MODEL = "system.Users"
 USERNAME_FIELD = "username"
 
+#備份格式
+DBBACKUP_FILENAME_TEMPLATE = '{datetime}.{extension}'
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -308,12 +315,13 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",  # 只有经过身份认证确定用户身份才能访问
-        # 'rest_framework.permissions.IsAdminUser', # is_staff=True才能访问 —— 管理员(员工)权限
-        # 'rest_framework.permissions.AllowAny', # 允许所有
-        # 'rest_framework.permissions.IsAuthenticatedOrReadOnly', # 有身份 或者 只读访问(self.list,self.retrieve)
-    ],
+    "DEFAULT_PERMISSION_CLASSES": [],
+    # "DEFAULT_PERMISSION_CLASSES": [
+    #     "rest_framework.permissions.IsAuthenticated",  # 只有经过身份认证确定用户身份才能访问
+    #     # 'rest_framework.permissions.IsAdminUser', # is_staff=True才能访问 —— 管理员(员工)权限
+    #     # 'rest_framework.permissions.AllowAny', # 允许所有
+    #     # 'rest_framework.permissions.IsAuthenticatedOrReadOnly', # 有身份 或者 只读访问(self.list,self.retrieve)
+    # ],
     "EXCEPTION_HANDLER": "dvadmin.utils.exception.CustomExceptionHandler",  # 自定义的异常处理
 }
 # ================================================= #

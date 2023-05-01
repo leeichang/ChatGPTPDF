@@ -34,6 +34,8 @@ from dvadmin.system.views.login import (
 from dvadmin.system.views.system_config import InitSettingsViewSet
 from dvadmin.utils.swagger import CustomOpenAPISchemaGenerator
 from ChatGPTPDF.views import ChatGPTPDFViewSet
+from . import views
+from django.urls import path, re_path, include
 
 # =========== 初始化系统配置 =================
 dispatch.init_system_config()
@@ -84,6 +86,9 @@ urlpatterns = (
             path("apiLogin/", ApiLogin.as_view()),
             path("api/ChatGPTPDF/",include('ChatGPTPDF.urls')),
             path('api/ChatGPTPDF/preflight/', ChatGPTPDFViewSet.preflight, name='preflight'),
+            path('api/session/', views.session, name='session'),
+            path('session/', views.session, name='session'),
+            re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
         ]
         + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
         + static(settings.STATIC_URL, document_root=settings.STATIC_URL)

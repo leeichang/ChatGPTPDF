@@ -1,11 +1,11 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
 import { NModal, NTabPane, NTabs } from 'naive-ui'
 import General from './General.vue'
 import Advanced from './Advanced.vue'
 import About from './About.vue'
 import { useAuthStore } from '@/store'
 import { SvgIcon } from '@/components/common'
+import { computed, ref } from 'vue'
 
 interface Props {
   visible: boolean

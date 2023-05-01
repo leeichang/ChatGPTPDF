@@ -17,7 +17,8 @@ from .util import (
     get_answer_qa,
     get_sources_qa,
     get_answer_pinecone,
-    get_answer_summary
+    get_answer_summary,
+    openai_chat
 )
 import uuid
 from .CacheManager import CacheManager
@@ -25,6 +26,7 @@ from .CacheManager import CacheManager
 from typing import Dict, Any
 from langchain.memory import ChatMessageHistory
 from .query_data import get_chain
+import array
 
 def user_directory_path(instance, filename):
     # 檔案上傳後的儲存路徑，使用 uuid 作為檔案名稱
@@ -55,14 +57,25 @@ class ChatGPTPDF(CoreModel):
 
     def set_qa_documents(document_ids):
         cache = CacheManager()
-        for doc in document_ids:
-            obj = ChatGPTPDF.objects.get(id=doc)
-            uuid = obj.file_uuid
-            if not cache.check_cache(uuid):
-                # 1. get store embedding
-                store_embedding = get_store_embedding(uuid)
-                # 2. put store embedding into cache
-                cache.set(uuid, store_embedding)
+        # 判斷 my_array 是否是 array 型別
+        if isinstance(document_ids, array.array):
+            for doc in document_ids:
+                obj = ChatGPTPDF.objects.get(id=doc)
+                uuid = obj.file_uuid
+                if not cache.check_cache(uuid):
+                    # 1. get store embedding
+                    store_embedding = get_store_embedding(uuid)
+                    # 2. put store embedding into cache
+                    cache.set(uuid, store_embedding)
+        else:
+            if(document_ids>0):
+                obj = ChatGPTPDF.objects.get(id=document_ids)
+                uuid = obj.file_uuid
+                if not cache.check_cache(uuid):
+                    # 1. get store embedding
+                    store_embedding = get_store_embedding(uuid)
+                    # 2. put store embedding into cache
+                    cache.set(uuid, store_embedding)           
 
     def get_chat_history(uuid)->ChatMessageHistory:
         cache = CacheManager()
@@ -74,36 +87,80 @@ class ChatGPTPDF(CoreModel):
 
         return history
 
+    @staticmethod
+    def contains_keywords(text, keywords):
+        return any(keyword in text for keyword in keywords) 
+
     def chatReplyProcess(options: Dict[str, Any]) -> None:
         message = options['message']
         process = options.get('process')
         selectedKeys = options.get('selectedKeys')
         question_handler = options.get('question_handler')
         stream_handler= options.get('stream_handler')
-        
-        if len(selectedKeys) > 0:
-            cache = CacheManager()
-            # 1. get store embedding
-            obj = ChatGPTPDF.objects.get(id=selectedKeys[0])
-            uuid = obj.file_uuid
-            history = ChatGPTPDF.get_chat_history(uuid)
-            if cache.check_cache(uuid):
-                store_embedding = cache.get(uuid)
-            else:
-                store_embedding = get_store_embedding(uuid)
-                cache.set(uuid, store_embedding)
+        id = 0;
+        if isinstance(selectedKeys, array.array):
+            id = selectedKeys[0]
+        else:
+            id = selectedKeys
 
-            # 2. search docs
-            search_result = search_docs(store_embedding,message)
-            # 3. get answer
-            answer = get_answer_qa(search_result , message)
-            result =answer["output_text"]
-            history.add_user_message(message)
-            history.add_ai_message(result)
-            key = "HISTORY_KEY_" + str(uuid)
-            cache.set(key, history)
+        cache = CacheManager()
+        # 1. get store embedding
+        obj = ChatGPTPDF.objects.get(id=id)
+        uuid = obj.file_uuid
+        history = ChatGPTPDF.get_chat_history(uuid)
+        if cache.check_cache(uuid):
+            store_embedding = cache.get(uuid)
+        else:
+            store_embedding = get_store_embedding(uuid)
+            cache.set(uuid, store_embedding)
 
-            return result
+        # 2. search docs
+        search_result = search_docs(store_embedding,message)
+        # 3. get answer
+        answer = get_answer_qa(search_result , message)
+        result =answer["output_text"]
+        NoAnswer=["很抱歉","我不知道","无法回答","無法回答","對不起"]
+        if ChatGPTPDF.contains_keywords(result ,NoAnswer):
+            result = "這個問題需要專人來回覆你，請留下您的Email或聯絡電話與分機我們將主動與你聯繫！"
+        else:
+            result = answer["output_text"]
+            
+        history.add_user_message(message)
+        history.add_ai_message(result)
+        key = "HISTORY_KEY_" + str(uuid)
+        cache.set(key, history)
+
+        return result
+    
+    def getDefaultSummaryAndQuestion(uuid):
+        cache = CacheManager()
+        if cache.check_cache(uuid):
+            store_embedding = cache.get(uuid)
+        else:
+            store_embedding = get_store_embedding(uuid)
+            cache.set(uuid, store_embedding)
+        message = "請給我本篇文章的摘要大概在200個字以內，並回覆繁體中文"
+        # 2. search docs
+        search_result = search_docs(store_embedding,message)        
+        # 3. get answer
+        answer = get_answer_qa(search_result , message)
+        result =answer["output_text"]
+        message = "請給我本篇文章的5個重點，以條列式的方式呈現!並回覆繁體中文"
+        search_result = search_docs(store_embedding,message)        
+        # 3. get answer
+        answer = get_answer_qa(search_result , message)
+        result1 =answer["output_text"]
+        result = result + "\n\n五個內容相關重點：\n" + result1
+        message = f"請依據下面摘要內容:{result} 建議三個跟內容有關的問題，請以條列式的方式呈現!並回覆繁體中文"
+        result2 = openai_chat(message)
+        result = result + "\n\n三個內容相關建議問題\n" + result2
+        history = ChatMessageHistory()
+        history.add_ai_message(result)
+        key = "HISTORY_KEY_" + str(uuid)
+        cache.set(key, history)
+        return result
+
+
 
     class Meta:
         db_table = "files"
