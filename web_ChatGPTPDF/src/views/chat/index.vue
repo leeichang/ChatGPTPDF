@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import {
@@ -18,11 +18,16 @@ import { useUsingContext } from "./hooks/useUsingContext";
 import HeaderComponent from "./components/Header/index.vue";
 import { HoverButton, SvgIcon } from "@/components/common";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
-import { useChatStore, usePromptStore } from "@/store";
+import { useChatStore, usePromptStore, useAppStore } from "@/store";
 import { fetchChatAPIProcess } from "@/api";
 import { t } from "@/locales";
 import PdfViewer from "../pdfviewer/index.vue";
+import LoadingAnimation from "vue3-loading-overlay";
+import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
 
+const isLoading = ref(false);
+const fullPage = ref(false);
+const opacity = ref(0.7);
 let controller = new AbortController();
 
 const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === "true";
@@ -59,7 +64,8 @@ const loading = ref<boolean>(false);
 const promptStore = usePromptStore();
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
 const { promptList: promptTemplate } = storeToRefs<any>(promptStore);
-
+const appStore = useAppStore();
+const { loading:chatLoading } = storeToRefs(appStore);
 //處理左右滑動
 const leftWidth = ref(50);
 const rightWidth = ref(50);
@@ -85,6 +91,19 @@ const startResize = (event: MouseEvent) => {
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
 };
+
+watch(
+	() => chatLoading.value,
+	(newVal) => {
+		isLoading.value = newVal;
+	}
+);
+
+const onCancel = () => {
+      console.log("User cancelled the loader.");
+      //because the props is single flow direction, you need to set isLoading status normally.
+      isLoading.value = false;
+    };
 
 function handleSubmit() {
   onConversation();
@@ -173,7 +192,7 @@ async function onConversation() {
             }
 
             scrollToBottom();
-          } catch (error:any) {
+          } catch (error) {
             //
           }
         },
@@ -284,7 +303,7 @@ async function onRegenerate(index: number) {
               message = "";
               return fetchChatAPIOnce();
             }
-          } catch (error:any) {
+          } catch (error) {
             //
           }
         },
@@ -345,7 +364,7 @@ function handleExport() {
         d.loading = false;
         ms.success(t("chat.exportSuccess"));
         Promise.resolve();
-      } catch (error:any) {
+      } catch (error) {
         ms.error(t("chat.exportFailed"));
       } finally {
         d.loading = false;
@@ -462,11 +481,12 @@ onMounted(() => {
 onUnmounted(() => {
   if (loading.value) controller.abort();
 });
+
 </script>
 
 <template>
   <div class="container" ref="containerRef">
-    <div ref= "left_div" class="left-div" :style="{ width: leftWidth + '%' }">
+    <div ref="left_div" class="left-div" :style="{ width: leftWidth + '%' }">
       <PdfViewer ref="pdfViewer" :scale="pdfScale" />
     </div>
     <div
@@ -527,6 +547,14 @@ onUnmounted(() => {
               </template>
             </div>
           </div>
+          <LoadingAnimation
+            :active="isLoading"
+            :can-cancel="true"
+            :on-cancel="onCancel"
+            :is-full-page="fullPage"
+            loader="spinner"
+						:opacity=opacity
+          ></LoadingAnimation>
         </main>
         <footer :class="footerClass">
           <div class="w-full max-w-screen-xl m-auto">

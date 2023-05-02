@@ -30,9 +30,9 @@ export const useChatStore = defineStore("chat-store", {
       this.recordState();
     },
 
-    addHistory(history: Chat.History, chatData: Chat.Chat[] = [],id:number,name:string) {
+    addHistory(history: Chat.History, chatData: Chat.Chat[] = []) {
       this.history.unshift(history);
-      this.chat.unshift({ uuid: history.uuid, data: chatData,pdfFileId:id, pdfFileName:name });
+      this.chat.unshift({ uuid: history.uuid, data: chatData,pdfFileId:history.id, pdfFileName:history.name });
       this.active = history.uuid;
       this.reloadRoute(history.uuid);
     },
@@ -98,7 +98,7 @@ export const useChatStore = defineStore("chat-store", {
       if (!uuid || uuid === 0) {
         if (this.history.length === 0) {
           const uuid = Date.now();
-          this.history.push({ uuid, title: chat.text, isEdit: false });
+          this.history.push({ uuid, title: chat.text, isEdit: false,id:0,name:"" });
           this.chat.push({ uuid, data: [chat],pdfFileId:0, pdfFileName:"" });
           this.active = uuid;
           this.recordState();

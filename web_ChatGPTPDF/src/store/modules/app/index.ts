@@ -33,6 +33,16 @@ export const useAppStore = defineStore("app-store", {
       this.pdf = pdf;
       this.recordState();
     },
+		setUploadPdf(uploadPdf: File) {
+			console.log("setUploadPdf: " , uploadPdf);
+      this.uploadPdf = uploadPdf;
+      this.recordState();
+    },
+		setLoading(loading: boolean) {
+			console.log("setLoading: " , loading);
+      this.loading = loading;
+      this.recordState();
+    },
     recordState() {
       setLocalSetting(this.$state);
     },

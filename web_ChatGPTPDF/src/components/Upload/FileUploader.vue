@@ -25,7 +25,9 @@ export default defineComponent({
 
     const onFileInputChange = (event: Event) => {
       const files = (event.target as HTMLInputElement).files;
+
       if (files) {
+				appStore.setUploadPdf(files[0]);
         uploadFiles(files);
       }
     };
@@ -41,6 +43,7 @@ export default defineComponent({
     const uploadFiles = (files: FileList) => {
       uploading.value = true;
       uploaded.value = false;
+			appStore.setLoading(true);
 			//rotating.value = false; // 停止旋转
       let filename: string = "";
       // 上傳文件的邏輯
@@ -57,6 +60,7 @@ export default defineComponent({
           console.log(res);
           uploaded.value = true;
           uploading.value = false;
+					appStore.setLoading(false);
           let id = res.data.id;
           let name = filename;
 
@@ -73,9 +77,12 @@ export default defineComponent({
           }, 3000);
         })
         .catch((err) => {
+					uploading.value = false;
+					appStore.setLoading(false);
           message.error(err);
         });
     };
+
 
     return {
       fileInput,

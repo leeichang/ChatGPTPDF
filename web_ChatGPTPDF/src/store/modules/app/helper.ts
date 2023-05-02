@@ -11,6 +11,8 @@ export interface AppState {
   language: Language;
   selectedKeys: number[]|number;
   pdf: File | null;
+	loading: boolean;
+	uploadPdf: File | null;
 }
 
 export function defaultSetting(): AppState {
@@ -20,6 +22,8 @@ export function defaultSetting(): AppState {
     language: "zh-TW",
     selectedKeys: [],
     pdf: null,
+		loading: false,
+		uploadPdf: null,	
   };
 }
 

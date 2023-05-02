@@ -107,7 +107,10 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
         
         except openai.error.APIConnectionError as e:
             print(f"API連接錯誤: {e}")
-
+        except Exception as e:
+            # 處理所有其他未捕獲的異常的代碼
+            print(f"An unexpected error occurred: {e}")
+            
     @action(detail=False, methods=['GET'])
     def my_files(self, request):
         files = self.queryset.filter(creator=request.query_params['user'] ,indexed = True )
