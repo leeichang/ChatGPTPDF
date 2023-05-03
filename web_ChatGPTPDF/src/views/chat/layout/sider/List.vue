@@ -17,12 +17,25 @@ const dataSources = computed(() => chatStore.history);
 
 async function handleSelect({ uuid }: Chat.History) {
   if (isActive(uuid)) return;
-	if (appStore.loading) return;
+  if (appStore.loading) return;
   if (chatStore.active)
     chatStore.updateHistory(chatStore.active, { isEdit: false });
   await chatStore.setActive(uuid);
 
   if (isMobile.value) appStore.setSiderCollapsed(true);
+
+  const chatIndex = chatStore.chat.findIndex(
+    (item) => item.uuid === uuid
+  );
+  if (chatIndex !== -1) {
+    let id: number = chatStore.chat[chatIndex].pdfFileId;
+    if (id > 0) {
+      set_qa_documents(id).then((response) => {
+        console.log(response);
+      });
+      appStore.setSelectedKeys(id);
+    }
+  }
 }
 
 function handleEdit(
@@ -53,20 +66,7 @@ function handleEnter(
 
 function isActive(uuid: number) {
   let active: boolean = chatStore.active === uuid;
-  if (active) {
-    const chatIndex = chatStore.chat.findIndex(
-      (item) => item.uuid === chatStore.active
-    );
-    if (chatIndex !== -1) {
-      let id: number = chatStore.chat[chatIndex].pdfFileId;
-      if (id > 0) {
-        set_qa_documents(id).then((response) => {
-          console.log(response);
-        });
-        appStore.setSelectedKeys(id);
-      }
-    }
-  }
+
   return active;
 }
 </script>

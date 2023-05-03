@@ -114,8 +114,14 @@ STUFF_PROMPT2 = PromptTemplate(
     template=template2, input_variables=["context", "question"]
 )
 
+class CustomPromptTemplate(PromptTemplate):
+    def generate_prompt(self, input_dict):
+        input_variables = {key: input_dict[key] for key in self.input_variables}
+        openai_prompt = self.template.format(**input_variables)
+        return openai_prompt
+
 template3 = """Create a final answer to the given questions using the provided document excerpts(in no particular order) as references. 
-              If you are unable to answer the question, simply state that you do not know. Do not attempt to fabricate an answer .
+              If you are unable to answer the question, simply state that 我不知道. Do not attempt to fabricate an answer .
 Answer in Traditional Chinese:
 ---------
 QUESTION: {question}
@@ -124,7 +130,7 @@ QUESTION: {question}
 =========
 FINAL ANSWER:"""
 
-STUFF_PROMPT3 = PromptTemplate(
+STUFF_PROMPT3 = CustomPromptTemplate(
     template=template3, input_variables=["context", "question"]
 )
 
@@ -357,7 +363,8 @@ def get_answer_qa(docs: List[Document], query: str) -> Dict[str, Any]:
     # chain = load_qa_with_sources_chain(
     #     Cohere(temperature=0), chain_type="stuff", prompt=STUFF_PROMPT  # type: ignore
     # )
-
+    final_prompt = STUFF_PROMPT3.generate_prompt({"context": docs, "question": query})
+    
     answer = chain({"input_documents": docs, "question": query})
     #
     return answer

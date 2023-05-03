@@ -25,6 +25,7 @@ import PdfViewer from "../pdfviewer/index.vue";
 import LoadingAnimation from "vue3-loading-overlay";
 import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
 
+
 const isLoading = ref(false);
 const fullPage = ref(false);
 const opacity = ref(0.7);
@@ -65,8 +66,9 @@ const promptStore = usePromptStore();
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
 const { promptList: promptTemplate } = storeToRefs<any>(promptStore);
 const appStore = useAppStore();
-const { loading:chatLoading } = storeToRefs(appStore);
+const { loading:chatLoading,foldPdf:globalFoldPdf } = storeToRefs(appStore);
 //處理左右滑動
+const foldPdf = ref(globalFoldPdf.value);
 const leftWidth = ref(50);
 const rightWidth = ref(50);
 const pdfScale = ref(1);
@@ -171,7 +173,7 @@ async function onConversation() {
             updateChat(+uuid, dataSources.value.length - 1, {
               dateTime: new Date().toLocaleString(),
               text: lastText + data.text ?? "",
-              inversion: false,
+              inversion: data.inversion ?? false,
               error: false,
               loading: false,
               conversationOptions: {
@@ -284,7 +286,7 @@ async function onRegenerate(index: number) {
             updateChat(+uuid, index, {
               dateTime: new Date().toLocaleString(),
               text: lastText + data.text ?? "",
-              inversion: false,
+              inversion: data.inversion?? false,
               error: false,
               loading: false,
               conversationOptions: {
@@ -449,7 +451,10 @@ const renderOption = (option: { label: string }) => {
   }
   return [];
 };
-
+const setFoldPdf = (value: boolean) => {
+	foldPdf.value = value;
+	appStore.setFoldPdf(value);
+};
 const placeholder = computed(() => {
   if (isMobile.value) return t("chat.placeholderMobile");
   return t("chat.placeholder");
@@ -474,6 +479,11 @@ const footerClass = computed(() => {
   return classes;
 });
 
+const divWidth = computed(() => {
+  return foldPdf.value ? "100%" : `${rightWidth}%`;
+});
+
+
 onMounted(() => {
   scrollToBottom();
 });
@@ -486,16 +496,19 @@ onUnmounted(() => {
 
 <template>
   <div class="container" ref="containerRef">
-    <div ref="left_div" class="left-div" :style="{ width: leftWidth + '%' }">
-      <PdfViewer ref="pdfViewer" :scale="pdfScale" />
+	  <button v-if="!foldPdf" class="fold_left" @click="setFoldPdf(!foldPdf)"><SvgIcon icon="line-md:menu-fold-left" class="mr-2 text-3xl" /></button>
+    <button v-if="foldPdf" class="fold_right" @click="setFoldPdf(!foldPdf)"><SvgIcon icon="line-md:menu-fold-right" class="mr-2 text-3xl" /></button>
+
+		<div v-if="!foldPdf" ref="left_div" class="left-div" :style="{ width: leftWidth + '%' }">
+      <PdfViewer ref="pdfViewer" :scale="pdfScale" :foldPdf ="foldPdf" />
     </div>
-    <div
+    <div v-if="!foldPdf"
       class="drag-button"
       ref="dragButtonRef"
       @mousedown="startResize"
       :style="{ left: leftWidth + '%' }"
     ></div>
-    <div class="right-div" :style="{ width: rightWidth + '%' }">
+    <div class="right-div" :style="{ width: divWidth  }">
       <div class="flex flex-col w-full h-full">
         <HeaderComponent
           v-if="isMobile"
@@ -619,10 +632,24 @@ onUnmounted(() => {
 
 <style scoped>
 .container {
+	position: relative;
   display: flex;
   height: 100%;
 }
-
+.fold_left {
+	position: absolute;
+	top:0px;
+	z-index: 999;
+	width: 30px;
+	height: 30px;
+}
+.fold_right {
+	position: absolute;
+	top:0px;
+	z-index: 999;
+	width: 30px;
+	height: 30px;
+}
 .left-div {
   position: relative;
 }

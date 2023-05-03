@@ -178,7 +178,7 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
 
         first_chunk = True
         try:
-            response_data = ChatGPTPDF.chatReplyProcess({
+            response_data,inversion = ChatGPTPDF.chatReplyProcess({
                 'message': prompt,
                 'process': process,
                 'selectedKeys': selectedKeys,
@@ -191,5 +191,6 @@ class ChatGPTPDFViewSet(CustomModelViewSet):
         std_data={
             "status":"Success",
             "text":response_data,
+            "inversion":inversion,
         }
         return Response(std_data,status=status.HTTP_200_OK)

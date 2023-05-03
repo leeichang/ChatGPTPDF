@@ -119,18 +119,23 @@ class ChatGPTPDF(CoreModel):
         # 3. get answer
         answer = get_answer_qa(search_result , message)
         result =answer["output_text"]
-        NoAnswer=["很抱歉","我不知道","无法回答","無法回答","對不起"]
+        NoAnswer=["很抱歉","不知道","无法回答","無法回答","對不起","沒有提到在提供文件中","無法給出明確答案","未提及相關內容","並未提及","未提供相關解決方案","並未在提供的文件","沒有明確回答","沒有提到","在文件中找不到"]
         if ChatGPTPDF.contains_keywords(result ,NoAnswer):
-            result = "這個問題需要專人來回覆你，請留下您的Email或聯絡電話與分機我們將主動與你聯繫！"
+            result = """感謝您的提問！我們非常重視您的問題:{message}，但目前我們還無法立即回答。為了讓您能得到最精確的答案，我們需要進一步調查和確認。請您填寫下方的資料，留下聯絡訊息，我們會盡快回覆您。如果您還有任何其他問題，歡迎隨時聯繫我們。謝謝您的耐心等待，期待為您提供更好的服務！
+                     您的稱謂 您的電子郵件 
+            範例格式： 李先生 sales.info@cymmetrik.com
+            """
+            inversion = False
         else:
             result = answer["output_text"]
+            inversion = False
             
         history.add_user_message(message)
         history.add_ai_message(result)
         key = "HISTORY_KEY_" + str(uuid)
         cache.set(key, history)
 
-        return result
+        return result,inversion
     
     def getDefaultSummaryAndQuestion(uuid):
         cache = CacheManager()

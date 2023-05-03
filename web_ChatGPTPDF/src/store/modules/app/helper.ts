@@ -13,6 +13,9 @@ export interface AppState {
   pdf: File | null;
 	loading: boolean;
 	uploadPdf: File | null;
+	foldPdf: boolean;
+	downloadPdf: boolean;
+	isFirstLoad :boolean;
 }
 
 export function defaultSetting(): AppState {
@@ -23,7 +26,10 @@ export function defaultSetting(): AppState {
     selectedKeys: [],
     pdf: null,
 		loading: false,
-		uploadPdf: null,	
+		uploadPdf: null,
+		foldPdf: false,
+		downloadPdf: false,
+		isFirstLoad :true,
   };
 }
 

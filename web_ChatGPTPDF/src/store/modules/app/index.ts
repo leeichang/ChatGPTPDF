@@ -22,27 +22,43 @@ export const useAppStore = defineStore("app-store", {
         this.recordState();
       }
     },
-    setSelectedKeys(selectedKeys: number[]|number) {
+    setSelectedKeys(selectedKeys: number[] | number) {
       //if (this.selectedKeys !== selectedKeys) {
-        this.selectedKeys = selectedKeys;
-        this.recordState();
+      this.selectedKeys = selectedKeys;
+      this.recordState();
       //}
     },
     setPdf(pdf: File) {
-			console.log("setPdf: " , pdf);
+      console.log("setPdf: ", pdf);
       this.pdf = pdf;
       this.recordState();
     },
-		setUploadPdf(uploadPdf: File) {
-			console.log("setUploadPdf: " , uploadPdf);
+    setUploadPdf(uploadPdf: File) {
+      console.log("setUploadPdf: ", uploadPdf);
       this.uploadPdf = uploadPdf;
       this.recordState();
     },
-		setLoading(loading: boolean) {
-			console.log("setLoading: " , loading);
+    setLoading(loading: boolean) {
+      console.log("setLoading: ", loading);
       this.loading = loading;
       this.recordState();
     },
+    setFoldPdf(foldPdf: boolean) {
+      console.log("setFoldPdf: ", foldPdf);
+      this.foldPdf = foldPdf;
+      this.recordState();
+    },
+    setDownLoadPdf(downloadPdf: boolean) {
+      console.log("setDownloadPdf: ", downloadPdf);
+      this.downloadPdf = downloadPdf;
+      this.recordState();
+    },
+    setIsFirstLoad(isFirstLoad: boolean) {
+      console.log("setIsFirstLoad: ", isFirstLoad);
+      this.isFirstLoad = isFirstLoad;
+      this.recordState();
+    },
+
     recordState() {
       setLocalSetting(this.$state);
     },

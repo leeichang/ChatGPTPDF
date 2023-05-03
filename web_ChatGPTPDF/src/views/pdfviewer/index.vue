@@ -12,6 +12,7 @@ import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
 import { SvgIcon } from "@/components/common";
 
 export default defineComponent({
+
   components: {
     Loading,
     SvgIcon,
@@ -20,6 +21,14 @@ export default defineComponent({
     scale: {
       type: Number,
       default: 1,
+    },
+    foldPdf: {
+      type: Boolean,
+      default: false,
+    },
+    isFirstLoad: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props) {
@@ -31,9 +40,9 @@ export default defineComponent({
     const pdf = ref<File>(new File([], ""));
     const pdfScale = ref(props.scale);
     const userStore = useAppStore();
-		// const chatStore = useChatStore();
+    // const chatStore = useChatStore();
     //const { selectedKeys, uploadPdf } = storeToRefs(userStore);
-		const { selectedKeys } = storeToRefs(userStore);
+    const { selectedKeys } = storeToRefs(userStore);
     const canvases = ref<NodeListOf<HTMLCanvasElement>>(
       document.querySelectorAll(".pdf-page-canvas")
     );
@@ -119,6 +128,8 @@ export default defineComponent({
           totalPages.value = pdfDoc.numPages;
         });
       }
+      userStore.setDownLoadPdf(false);
+			isLoading.value = false;
     };
 
     const renderPage = (pageNumber: number, canvas: HTMLCanvasElement) => {
@@ -160,25 +171,45 @@ export default defineComponent({
     //透過api下載pdf檔案
     // Define a function named downloadFile that takes in a file uuid as a parameter
     const downloadfile = async (id: number) => {
-      isLoading.value = true;
+      //userStore.setDownLoadPdf(false);
+      if (userStore.downloadPdf || props.foldPdf === true) return;
+			isLoading.value = true;
+      userStore.setDownLoadPdf(true);
       downloadFile(id).then(async (response) => {
         const appStore = useAppStore();
         pdf.value = response.data;
         appStore.setPdf(pdf.value);
         loadPdf(pdf);
-        isLoading.value = false;
       });
     };
 
     onMounted(() => {
-      var id = userStore.selectedKeys;
-      if (isArray(id)) {
-        downloadfile(id[0]);
-      } else {
-        downloadfile(id);
-      }
-    });
 
+			if (userStore.isFirstLoad) {
+				userStore.setDownLoadPdf(false);
+        var id = userStore.selectedKeys;
+        if (isArray(id)) {
+          downloadfile(id[0]);
+        } else {
+          downloadfile(id);
+        }
+				userStore.setIsFirstLoad(false);
+      }
+
+    });
+    watch(
+      () => props.foldPdf,
+      (newFoldPdf) => {
+        if (newFoldPdf === false) {
+          var id = userStore.selectedKeys;
+          if (isArray(id)) {
+            downloadfile(id[0]);
+          } else {
+            downloadfile(id);
+          }
+        }
+      }
+    );
     watch(
       () => props.scale,
       (newScale) => {
@@ -187,8 +218,8 @@ export default defineComponent({
     );
     // watch(uploadPdf, (newVal) => {
     //   if (newVal) {
-		// 		let uuid = Date.now()
-		// 		chatStore.addHistory({ title: newVal.name, uuid: uuid, isEdit: false, id:0, name:newVal.name},[]);
+    // 		let uuid = Date.now()
+    // 		chatStore.addHistory({ title: newVal.name, uuid: uuid, isEdit: false, id:0, name:newVal.name},[]);
 
     //     (async () => {
     //       const arrayBuffer = await fileToArrayBuffer(newVal);
@@ -207,7 +238,7 @@ export default defineComponent({
     //   isLoading.value = newVal;
     // });
     watch(selectedKeys, (newVal) => {
-      if (newVal === undefined || newVal ===0 || isLoading.value) return;
+      if (newVal === undefined || newVal === 0 || isLoading.value) return;
       if (isArray(newVal)) {
         downloadfile(Number(newVal[0]));
       } else {
