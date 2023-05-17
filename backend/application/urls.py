@@ -34,7 +34,7 @@ from dvadmin.system.views.login import (
 from dvadmin.system.views.system_config import InitSettingsViewSet
 from dvadmin.utils.swagger import CustomOpenAPISchemaGenerator
 from ChatGPTPDF.views import ChatGPTPDFViewSet
-#from unAnswerQuestion.views import unAnswerQuestionViewSet
+from UnAnswerQuestion.views import unAnswerQuestionViewSet
 from . import views
 from django.urls import path, re_path, include
 
@@ -86,9 +86,10 @@ urlpatterns = (
             path("api/init/settings/", InitSettingsViewSet.as_view()),
             path("apiLogin/", ApiLogin.as_view()),
             path("api/ChatGPTPDF/",include('ChatGPTPDF.urls')),
-            #path("api/unAnswerQuestion/",include('unAnswerQuestion.urls')),
+            path("api/UnAnswerQuestion/",include('UnAnswerQuestion.urls')),
             path('api/ChatGPTPDF/preflight/', ChatGPTPDFViewSet.preflight, name='preflight'),
             path('api/session/', views.session, name='session'),
+            path(r'api/dvadmin_celery/', include('dvadmin_celery.urls')),
             path('session/', views.session, name='session'),
             re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
         ]

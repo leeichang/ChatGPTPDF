@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { getLocalState, setLocalState } from "./helper";
 import { router } from "@/router";
+import { useAppStore } from "../app";
 
 export const useChatStore = defineStore("chat-store", {
   state: (): Chat.ChatState => getLocalState(),
@@ -57,9 +58,11 @@ export const useChatStore = defineStore("chat-store", {
       }
 
       if (index > 0 && index <= this.history.length) {
-        const uuid = this.history[index - 1].uuid;
+				const appStore = useAppStore();
+				const uuid = this.history[index - 1].uuid;
         this.active = uuid;
         this.reloadRoute(uuid);
+				appStore.setSelectedKeys(this.history[index - 1].id);
         return;
       }
 

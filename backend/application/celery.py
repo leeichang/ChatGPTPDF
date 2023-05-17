@@ -1,4 +1,6 @@
 import os
+import sys
+print(sys.path)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'application.settings')
 

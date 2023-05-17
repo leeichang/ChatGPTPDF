@@ -9,6 +9,9 @@ const { theme, themeOverrides } = useTheme()
 const { language } = useLanguage()
 const userStore = useAppStore();
 userStore.setIsFirstLoad(true);
+userStore.setLoading(false);
+userStore.setDownLoadPdf(false);
+userStore.setTriggerDownLoad(false);
 </script>
 
 <template>

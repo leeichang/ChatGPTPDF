@@ -20,11 +20,13 @@ import { HoverButton, SvgIcon } from "@/components/common";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
 import { useChatStore, usePromptStore, useAppStore } from "@/store";
 import { fetchChatAPIProcess } from "@/api";
+import { last_chat_summary } from "@/api/user";
 import { t } from "@/locales";
 import PdfViewer from "../pdfviewer/index.vue";
 import LoadingAnimation from "vue3-loading-overlay";
 import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
-
+import { embedding_history } from "@/api/user";
+// import { userInfo } from "os";
 
 const isLoading = ref(false);
 const fullPage = ref(false);
@@ -66,23 +68,35 @@ const promptStore = usePromptStore();
 // 使用storeToRefs，保证store修改后，联想部分能够重新渲染
 const { promptList: promptTemplate } = storeToRefs<any>(promptStore);
 const appStore = useAppStore();
-const { loading:chatLoading,foldPdf:globalFoldPdf } = storeToRefs(appStore);
+const { loading: chatLoading, foldPdf: globalFoldPdf } = storeToRefs(appStore);
 //處理左右滑動
 const foldPdf = ref(globalFoldPdf.value);
 const leftWidth = ref(50);
 const rightWidth = ref(50);
 const pdfScale = ref(1);
 
+// interface PdfViewerRef {
+//   downloadfile: (id: number) => void;
+// }
+
+const pdfViewer = ref<typeof PdfViewer | null>(null);
+
 const startResize = (event: MouseEvent) => {
   const startX = event.pageX;
+  console.log("startX", startX);
   const startLeftWidth = leftWidth.value;
+  console.log("leftWidth", startLeftWidth);
   const startRightWidth = rightWidth.value;
+  console.log("leftWidth", startRightWidth);
 
   const onMouseMove = (event: MouseEvent) => {
     const diffX = event.pageX - startX;
     leftWidth.value = startLeftWidth + (diffX / window.innerWidth) * 100;
     rightWidth.value = startRightWidth - (diffX / window.innerWidth) * 100;
+    console.log("leftWidth", leftWidth.value);
+    console.log("rightWidth", rightWidth.value);
     pdfScale.value = leftWidth.value / 50;
+    console.log("pdfScale", pdfScale.value);
   };
 
   const onMouseUp = () => {
@@ -95,17 +109,17 @@ const startResize = (event: MouseEvent) => {
 };
 
 watch(
-	() => chatLoading.value,
-	(newVal) => {
-		isLoading.value = newVal;
-	}
+  () => chatLoading.value,
+  (newVal) => {
+    isLoading.value = newVal;
+  }
 );
 
 const onCancel = () => {
-      console.log("User cancelled the loader.");
-      //because the props is single flow direction, you need to set isLoading status normally.
-      isLoading.value = false;
-    };
+  //console.log("User cancelled the loader.");
+  //because the props is single flow direction, you need to set isLoading status normally.
+  isLoading.value = false;
+};
 
 function handleSubmit() {
   onConversation();
@@ -154,9 +168,9 @@ async function onConversation() {
   try {
     let lastText = "";
     const fetchChatAPIOnce = async () => {
-      console.log("message", message);
-      console.log("options", options);
-      console.log("signal", controller.signal);
+      //console.log("message", message);
+      //console.log("options", options);
+      //console.log("signal", controller.signal);
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
         options,
@@ -286,7 +300,7 @@ async function onRegenerate(index: number) {
             updateChat(+uuid, index, {
               dateTime: new Date().toLocaleString(),
               text: lastText + data.text ?? "",
-              inversion: data.inversion?? false,
+              inversion: data.inversion ?? false,
               error: false,
               loading: false,
               conversationOptions: {
@@ -312,7 +326,7 @@ async function onRegenerate(index: number) {
       });
     };
     await fetchChatAPIOnce();
-  } catch (error: any) {
+  } catch (error:any) {
     if (error.message === "canceled") {
       updateChatSome(+uuid, index, {
         loading: false,
@@ -423,7 +437,11 @@ function handleStop() {
     loading.value = false;
   }
 }
-
+function handleHistory() {
+  embedding_history().then((response) => {
+    //console.log(response);
+  });
+}
 // 可优化部分
 // 搜索选项计算，这里使用value作为索引项，所以当出现重复value时渲染异常(多项同时出现选中效果)
 // 理想状态下其实应该是key作为索引项,但官方的renderOption会出现问题，所以就需要value反renderLabel实现
@@ -451,9 +469,26 @@ const renderOption = (option: { label: string }) => {
   }
   return [];
 };
+
 const setFoldPdf = (value: boolean) => {
-	foldPdf.value = value;
-	appStore.setFoldPdf(value);
+  foldPdf.value = value;
+  appStore.setFoldPdf(value);
+  //appStore.setTriggerDownLoad(false);
+  if (value === false) {
+    //const downloadfile = inject("downloadfile") as (id: number) => Promise<void>;
+    const uuid = chatStore.active;
+    const chatIndex = chatStore.chat.findIndex((item) => item.uuid === uuid);
+
+    if (chatIndex !== -1) {
+      const id = chatStore.chat[chatIndex].pdfFileId;
+      if (id > 0) {
+        //onMounted(() => {
+        appStore.setTriggerDownLoad(true);
+        pdfViewer.value?.downloadfile(id);
+        //});
+      }
+    }
+  }
 };
 const placeholder = computed(() => {
   if (isMobile.value) return t("chat.placeholderMobile");
@@ -480,35 +515,62 @@ const footerClass = computed(() => {
 });
 
 const divWidth = computed(() => {
-  return foldPdf.value ? "100%" : `${rightWidth}%`;
+  return foldPdf.value ? "100%" : `${rightWidth.value}%`;
 });
 
-
-onMounted(() => {
+ onMounted(async () => {
+	var id = appStore.selectedKeys;
+	const response = await last_chat_summary(id);
+	if(response!=""){
+		const uuid = chatStore.active;
+		if (uuid === null) {
+      // 處理 uuid 為 null 的情況
+      console.error('UUID is null');
+      return;
+    }
+		addChat(+uuid, {
+			dateTime: new Date().toLocaleString(),
+			text: response,
+			inversion: false,
+			error: false,
+			conversationOptions: null,
+			requestOptions: { prompt: "", options: null },
+		});
+		scrollToBottom();
+	}
   scrollToBottom();
 });
 
 onUnmounted(() => {
   if (loading.value) controller.abort();
 });
-
 </script>
 
 <template>
   <div class="container" ref="containerRef">
-	  <button v-if="!foldPdf" class="fold_left" @click="setFoldPdf(!foldPdf)"><SvgIcon icon="line-md:menu-fold-left" class="mr-2 text-3xl" /></button>
-    <button v-if="foldPdf" class="fold_right" @click="setFoldPdf(!foldPdf)"><SvgIcon icon="line-md:menu-fold-right" class="mr-2 text-3xl" /></button>
+    <button v-if="!foldPdf" class="fold_left" @click="setFoldPdf(!foldPdf)">
+      <SvgIcon icon="line-md:menu-fold-left" class="mr-2 text-3xl" />
+    </button>
+    <button v-if="foldPdf" class="fold_right" @click="setFoldPdf(!foldPdf)">
+      <SvgIcon icon="line-md:menu-fold-right" class="mr-2 text-3xl" />
+    </button>
 
-		<div v-if="!foldPdf" ref="left_div" class="left-div" :style="{ width: leftWidth + '%' }">
-      <PdfViewer ref="pdfViewer" :scale="pdfScale" :foldPdf ="foldPdf" />
+    <div
+      v-if="!foldPdf"
+      ref="left_div"
+      class="left-div"
+      :style="{ width: leftWidth + '%' }"
+    >
+      <PdfViewer ref="pdfViewer" :scale="pdfScale" :foldPdf="foldPdf" />
     </div>
-    <div v-if="!foldPdf"
+    <div
+      v-if="!foldPdf"
       class="drag-button"
       ref="dragButtonRef"
       @mousedown="startResize"
       :style="{ left: leftWidth + '%' }"
     ></div>
-    <div class="right-div" :style="{ width: divWidth  }">
+    <div class="right-div" :style="{ width: divWidth }">
       <div class="flex flex-col w-full h-full">
         <HeaderComponent
           v-if="isMobile"
@@ -566,7 +628,7 @@ onUnmounted(() => {
             :on-cancel="onCancel"
             :is-full-page="fullPage"
             loader="spinner"
-						:opacity=opacity
+            :opacity="opacity"
           ></LoadingAnimation>
         </main>
         <footer :class="footerClass">
@@ -582,7 +644,7 @@ onUnmounted(() => {
                   <SvgIcon icon="ri:download-2-line" />
                 </span>
               </HoverButton>
-              <!-- <HoverButton v-if="!isMobile" @click="toggleUsingContext">
+              <HoverButton v-if="!isMobile" @click="handleHistory">
                 <span
                   class="text-xl"
                   :class="{
@@ -592,7 +654,7 @@ onUnmounted(() => {
                 >
                   <SvgIcon icon="ri:chat-history-line" />
                 </span>
-              </HoverButton> -->
+              </HoverButton>
               <NAutoComplete
                 v-model:value="prompt"
                 :options="searchOptions"
@@ -632,23 +694,24 @@ onUnmounted(() => {
 
 <style scoped>
 .container {
-	position: relative;
+  position: relative;
   display: flex;
   height: 100%;
+  width: 100%;
 }
 .fold_left {
-	position: absolute;
-	top:0px;
-	z-index: 999;
-	width: 30px;
-	height: 30px;
+  position: absolute;
+  top: 0px;
+  z-index: 999;
+  width: 30px;
+  height: 30px;
 }
 .fold_right {
-	position: absolute;
-	top:0px;
-	z-index: 999;
-	width: 30px;
-	height: 30px;
+  position: absolute;
+  top: 0px;
+  z-index: 999;
+  width: 30px;
+  height: 30px;
 }
 .left-div {
   position: relative;

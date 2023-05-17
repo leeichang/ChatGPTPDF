@@ -41,7 +41,7 @@ function hideEmptyVersion() {
     // 'span.api-info-version' is for redoc 1.x, 'div.api-info span' is for redoc 2-alpha
     var apiVersion = document.querySelector('span.api-info-version') || document.querySelector('div.api-info span');
     if (!apiVersion) {
-        console.log("WARNING: could not find API versionString element (span.api-info-version)");
+        //console.log("WARNING: could not find API versionString element (span.api-info-version)");
         return;
     }
 

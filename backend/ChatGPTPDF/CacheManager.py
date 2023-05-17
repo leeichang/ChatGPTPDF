@@ -1,5 +1,6 @@
 from cachetools import TTLCache
 import time
+from .tasks import process_history_embedding
 
 class CacheManager:
     _instance = None
@@ -11,7 +12,7 @@ class CacheManager:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.cache = TTLCache(maxsize=100, ttl=1800)
+            cls._instance.cache = TTLCache(maxsize=100, ttl=60)
             cls._instance.key_access_time = {}
         return cls._instance
         
@@ -39,7 +40,14 @@ class CacheManager:
     def clear_expired(self):
         for key in list(self.cache.keys()):
             if self.is_expired(key):
-                self.delete(key)
+                if key.startswith("HISTORY_KEY_"):
+                    print("start process history embedding")
+                    # 1. get cache data        
+                    history = self.get(key)
+                    messages = history.buffer
+                    process_history_embedding.delay(key.replace("HISTORY_KEY_",""),messages)                       
+
+            self.delete(key)
 
     def cache_info(self):
         info = cachetools.CacheInfo(len(self.cache), self.cache.maxsize)

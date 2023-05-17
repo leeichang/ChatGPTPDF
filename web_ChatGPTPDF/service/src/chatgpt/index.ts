@@ -141,7 +141,7 @@ async function chatReplyProcess(options: RequestOptions) {
     return sendResponse({ type: "Success", data: response });
   } catch (error: any) {
     const code = error.statusCode;
-    global.console.log(error);
+    global.//console.log(error);
     if (Reflect.has(ErrorCodeMessage, code))
       return sendResponse({ type: "Fail", message: ErrorCodeMessage[code] });
     return sendResponse({

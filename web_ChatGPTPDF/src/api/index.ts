@@ -38,7 +38,7 @@ export function fetchChatAPIProcess<T = any>(params: {
       options: params.options,
       systemMessage: settingStore.systemMessage,
       selectedKeys: appStore.selectedKeys,
-    },
+   	 user_guid: appStore.user_guid, },
     signal: params.signal,
     onDownloadProgress: params.onDownloadProgress,
   });

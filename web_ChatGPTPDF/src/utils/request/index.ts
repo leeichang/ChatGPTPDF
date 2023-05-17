@@ -1,6 +1,6 @@
 import type { AxiosProgressEvent, AxiosResponse, GenericAbortSignal } from 'axios'
 import request from './axios'
-import { useAuthStore } from '@/store'
+import { useAppStore,useAuthStore } from '@/store'
 
 export interface HttpOption {
   url: string
@@ -22,6 +22,7 @@ export interface Response<T = any> {
 function http<T = any>(
   { url, data, method, headers, onDownloadProgress, signal, beforeRequest, afterRequest }: HttpOption,
 ) {
+	const appStore = useAppStore()
   const successHandler = (res: AxiosResponse<Response<T>>) => {
     const authStore = useAuthStore()
 
@@ -52,8 +53,12 @@ function http<T = any>(
 	// }
 
   return method === 'GET'
-    ? request.get(url, { params, signal, onDownloadProgress }).then(successHandler, failHandler)
-    : request.post( url, params, { headers, signal, onDownloadProgress }).then(successHandler, failHandler)
+    ? request.get(url, { params, signal, onDownloadProgress,headers: {
+			'X-GUID': appStore.user_guid
+	} }).then(successHandler, failHandler)
+    : request.post( url, params, { headers: {
+			'X-GUID': appStore.user_guid
+	}, signal, onDownloadProgress }).then(successHandler, failHandler)
 }
 
 export function get<T = any>(

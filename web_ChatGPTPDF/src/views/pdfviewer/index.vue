@@ -1,5 +1,40 @@
+<template>
+  <div class="container2" >
+    <div class="toolbar">
+      <button @click="zoomIn">
+        <SvgIcon icon="ic:baseline-zoom-in" class="mr-2 text-3xl" />
+      </button>
+      <button @click="zoomOut">
+        <SvgIcon icon="ic:baseline-zoom-out" class="mr-2 text-3xl" />
+      </button>
+      <button @click="prevPage">
+        <SvgIcon icon="ic:round-skip-previous" class="mr-2 text-3xl" />
+      </button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="nextPage">
+        <SvgIcon icon="ic:round-skip-next" class="mr-2 text-3xl" />
+      </button>
+    </div>
+    <div ref="pdf_viewer" class="pdf-viewer" id="pdf-viewer"></div>
+    <loading
+      :active="isLoading"
+      :can-cancel="true"
+      :on-cancel="onCancel"
+      :is-full-page="fullPage"
+      loader="spinner"
+    ></loading>
+  </div>
+</template>
+
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
+import {
+  defineComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import * as pdfjsLib from "pdfjs-dist";
 import { downloadFile } from "@/api/user";
 // import { useAppStore , useChatStore  } from "@/store";
@@ -12,7 +47,7 @@ import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
 import { SvgIcon } from "@/components/common";
 
 export default defineComponent({
-
+  name: "PdfViewer",
   components: {
     Loading,
     SvgIcon,
@@ -53,6 +88,8 @@ export default defineComponent({
     const currentPage = ref(1);
     const totalPages = ref(0);
 
+    const containerWidth = ref(0);
+
     // 在 setup() 函數中添加以下方法
     const zoomIn = () => {
       pdfScale.value += 0.1;
@@ -84,12 +121,13 @@ export default defineComponent({
     };
 
     const onCancel = () => {
-      console.log("User cancelled the loader.");
+      //console.log("User cancelled the loader.");
       //because the props is single flow direction, you need to set isLoading status normally.
       isLoading.value = false;
     };
     const loadPdf = async (pdf: any = null) => {
-      console.log("pdf", pdf);
+      //console.log("pdf", pdf);
+			let Total = 1;
       pdfjsLib.GlobalWorkerOptions.workerSrc =
         "../../../node_modules/pdfjs-dist/build/pdf.worker.js";
       if (pdf === undefined || pdf === null) {
@@ -106,8 +144,10 @@ export default defineComponent({
             canvas.className = "pdf-page-canvas";
             viewer.value.appendChild(canvas);
             renderPage(page, canvas);
+						Total = page;
           }
           totalPages.value = pdfDoc.numPages;
+          nextTick();
         });
       } else {
         const canvasElements = document.querySelectorAll(".pdf-page-canvas");
@@ -124,40 +164,53 @@ export default defineComponent({
             canvas.className = "pdf-page-canvas";
             viewer.value.appendChild(canvas);
             renderPage(page, canvas);
+						Total = page;
           }
-          totalPages.value = pdfDoc.numPages;
+
+          totalPages.value = Total;
+          nextTick();
         });
       }
       userStore.setDownLoadPdf(false);
-			isLoading.value = false;
+      isLoading.value = false;
+      userStore.setTriggerDownLoad(false);
     };
 
-    const renderPage = (pageNumber: number, canvas: HTMLCanvasElement) => {
-      thePdf.getPage(pageNumber).then(function (page: pdfjsLib.PDFPageProxy) {
-        const scale = pdfScale.value;
-        const viewport = page.getViewport({ scale });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        page.render({
-          canvasContext: canvas.getContext("2d")!,
-          viewport: viewport,
+    const renderPage = async (
+      pageNumber: number,
+      canvas: HTMLCanvasElement
+    ) => {
+      thePdf
+        .getPage(pageNumber)
+        .then(async function (page: pdfjsLib.PDFPageProxy) {
+          const scale = pdfScale.value;
+          const viewport = page.getViewport({ scale });
+          console.log("scale", scale);
+          console.log("viewport", viewport);
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          await page.render({
+            canvasContext: canvas.getContext("2d")!,
+            viewport: viewport,
+            background: "rgba(0,0,0,0)",
+          }).promise;
         });
-      });
     };
 
     const RerenderPage = _.debounce(async function () {
       canvases.value = document.querySelectorAll(".pdf-page-canvas")!;
-      console.log("RerenderPage canvases.value", canvases.value);
-      console.log("RerenderPage thePdf.numPages", thePdf.numPages);
+      //console.log("RerenderPage canvases.value", canvases.value);
+      //console.log("RerenderPage thePdf.numPages", thePdf.numPages);
       for (var pageNumber = 1; pageNumber <= thePdf.numPages; pageNumber++) {
         (function (pageNumber) {
           thePdf.getPage(pageNumber).then((page) => {
             const scale = pdfScale.value;
             const viewport = page.getViewport({ scale });
-            let canvas = canvases.value[pageNumber];
+            let canvas = canvases.value[pageNumber-1];
             const context = canvas.getContext("2d")!;
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
+            canvas.width = containerWidth.value;//viewport.width;
+            let rate = containerWidth.value / viewport.width;
+						canvas.height = viewport.height * rate;
             const renderContext = {
               canvasContext: context,
               viewport,
@@ -171,45 +224,92 @@ export default defineComponent({
     //透過api下載pdf檔案
     // Define a function named downloadFile that takes in a file uuid as a parameter
     const downloadfile = async (id: number) => {
-      //userStore.setDownLoadPdf(false);
-      if (userStore.downloadPdf || props.foldPdf === true) return;
-			isLoading.value = true;
-      userStore.setDownLoadPdf(true);
-      downloadFile(id).then(async (response) => {
+      try {
+        if (userStore.downloadPdf || props.foldPdf === true) return;
+        isLoading.value = true;
+        userStore.setDownLoadPdf(true);
+        const response = await downloadFile(id);
         const appStore = useAppStore();
         pdf.value = response.data;
         appStore.setPdf(pdf.value);
         loadPdf(pdf);
-      });
+      } catch (error) {
+        //console.log("downloadfile error", error);
+        const response = await downloadFile(id);
+        const appStore = useAppStore();
+        pdf.value = response.data;
+        appStore.setPdf(pdf.value);
+        loadPdf(pdf);
+      } finally {
+        userStore.setDownLoadPdf(false);
+        isLoading.value = false;
+      }
+      // if (userStore.downloadPdf || props.foldPdf === true) return;
+      // isLoading.value = true;
+      // userStore.setDownLoadPdf(true);
+      // downloadFile(id).then( (response) => {
+      //   const appStore = useAppStore();
+      //   pdf.value = response.data;
+      //   appStore.setPdf(pdf.value);
+      // 	loadPdf(pdf);
+      // } )
+      // .catch( (response) => {
+      // 	//console.log("downloadfile error", response);
+      // 	userStore.setDownLoadPdf(false);
+      // 	isLoading.value = false;
+      // });
     };
 
     onMounted(() => {
-
-			if (userStore.isFirstLoad) {
-				userStore.setDownLoadPdf(false);
+      if (userStore.isFirstLoad || userStore.triggerDownLoad) {
+        userStore.setDownLoadPdf(false);
         var id = userStore.selectedKeys;
         if (isArray(id)) {
           downloadfile(id[0]);
         } else {
           downloadfile(id);
         }
-				userStore.setIsFirstLoad(false);
+        userStore.setIsFirstLoad(false);
       }
-
+      containerWidth.value =
+        document.querySelector(".container2")?.clientWidth || 0;
     });
     watch(
-      () => props.foldPdf,
-      (newFoldPdf) => {
-        if (newFoldPdf === false) {
-          var id = userStore.selectedKeys;
-          if (isArray(id)) {
-            downloadfile(id[0]);
-          } else {
-            downloadfile(id);
-          }
+      () => userStore.triggerDownLoad,
+      (newVal, oldVal) => {
+        if (newVal === false || isLoading.value) {
+          return;
+        }
+        var id = userStore.selectedKeys;
+        if (isArray(id)) {
+          downloadfile(id[0]);
+        } else {
+          downloadfile(id);
         }
       }
     );
+
+    // watch(
+    //   () => userStore,
+    //   (newVal, oldVal) => {
+    //     if (newVal.foldPdf != oldVal.foldPdf&& newVal.foldPdf===false) {
+    //       //console.log("FoldPdf changed: ", newVal);
+    //       if (
+    //         newVal === undefined ||
+    //         newVal.foldPdf === true ||
+    //         isLoading.value
+    //       )
+    //         return;
+    //       var id = userStore.selectedKeys;
+    //       if (isArray(id)) {
+    //         downloadfile(id[0]);
+    //       } else {
+    //         downloadfile(id);
+    //       }
+    //     }
+    //   },
+    //   { deep: true }
+    // );
     watch(
       () => props.scale,
       (newScale) => {
@@ -228,13 +328,25 @@ export default defineComponent({
     //   }
     // });
     watch(pdfScale, (newVal) => {
-      console.log("watch pdfScale", pdf);
-      console.log("watch newVal", newVal);
+      //console.log("watch pdfScale", pdf);
+      //console.log("watch newVal", newVal);
 
       RerenderPage();
     });
+    // 監聽容器 div 寬度變化
+    watch(
+      () => document.querySelector("container2")?.clientWidth,
+      (width) => {
+        containerWidth.value = width || 0;
+      }
+    );
+
+    // 在容器寬度更新後，重新繪製 PDF
+    watch(containerWidth, () => {
+      RerenderPage();
+    });
     // watch(loading, (newVal) => {
-    //   console.log("watch loading", newVal);
+    //   //console.log("watch loading", newVal);
     //   isLoading.value = newVal;
     // });
     watch(selectedKeys, (newVal) => {
@@ -246,6 +358,14 @@ export default defineComponent({
       }
     });
 
+    // 在组件销毁之前注销 watch 函数
+    onBeforeUnmount(() => {
+      stop(); // 调用 stop 函数以注销 watch 函数
+    });
+
+    // defineExpose({
+    //   downloadfile
+    // });
     // function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
     //   return new Promise((resolve, reject) => {
     //     const fileReader = new FileReader();
@@ -274,38 +394,12 @@ export default defineComponent({
       zoomOut,
       prevPage,
       nextPage,
+      downloadfile,
+      containerWidth,
     };
   },
 });
 </script>
-
-<template>
-  <div class="container">
-    <div class="toolbar">
-      <button @click="zoomIn">
-        <SvgIcon icon="ic:baseline-zoom-in" class="mr-2 text-3xl" />
-      </button>
-      <button @click="zoomOut">
-        <SvgIcon icon="ic:baseline-zoom-out" class="mr-2 text-3xl" />
-      </button>
-      <button @click="prevPage">
-        <SvgIcon icon="ic:round-skip-previous" class="mr-2 text-3xl" />
-      </button>
-      <span>{{ currentPage }} / {{ totalPages }}</span>
-      <button @click="nextPage">
-        <SvgIcon icon="ic:round-skip-next" class="mr-2 text-3xl" />
-      </button>
-    </div>
-    <div ref="pdf_viewer" class="pdf-viewer" id="pdf-viewer"></div>
-    <loading
-      :active="isLoading"
-      :can-cancel="true"
-      :on-cancel="onCancel"
-      :is-full-page="fullPage"
-      loader="spinner"
-    ></loading>
-  </div>
-</template>
 
 <style scoped>
 .pdf-viewer {
@@ -319,8 +413,11 @@ export default defineComponent({
   display: block;
   margin-bottom: 1rem;
 }
-.container {
-  position: relative;
+.container2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+	top:0;
 }
 .toolbar {
   display: flex;
@@ -346,5 +443,17 @@ export default defineComponent({
   overflow-y: auto;
   overflow-x: hidden;
   height: calc(100% - 50px);
+  width: 100%;
+  /* Adjust this value to fit your desired container height */
+}
+.provided {
+  position: absolute;
+  top: 100;
+  left: 100;
+  width: 50%;
+  height: 40px;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 200;
 }
 </style>

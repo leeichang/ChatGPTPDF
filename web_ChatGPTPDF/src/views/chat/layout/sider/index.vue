@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CSSProperties } from "vue";
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, watch, onMounted } from "vue";
 import {
   NLayoutSider,
   NSpace,
@@ -11,8 +11,8 @@ import List from "./List.vue";
 import { useAppStore, useChatStore } from "@/store";
 import { useBasicLayout } from "@/hooks/useBasicLayout";
 // import { PromptStore } from "@/components/common";
-import { getMyFiles } from "@/api/user";
-import { options } from "@/typings/global";
+//import { getMyFiles } from "@/api/user";
+//import { options } from "@/typings/global";
 import FileUploader from "@/components/Upload/FileUploader.vue";
 import { useChat } from "@/views/chat/hooks/useChat";
 import { useScroll } from "@/views/chat/hooks/useScroll";
@@ -27,7 +27,7 @@ const { isMobile } = useBasicLayout();
 const collapsed = computed(() => appStore.siderCollapsed);
 
 // const selected_pdf_ids = ref([]);
-const options = ref<options[]>([]);
+//const options = ref<options[]>([]);
 
 // const message = useMessage();
 // const uploadRef = ref(null);
@@ -60,37 +60,37 @@ const mobileSafeArea = computed(() => {
   return {};
 });
 
-async function fetchData() {
-  try {
-    const userId = 1; // 替換為您的 userId 參數值
-    const files = await getMyFiles(userId); // 傳入 userId
-    options.value = [];
-    //檔案逐筆處理
-    files.forEach((file) => {
-      const firstUnderscoreIndex = file.file_name.indexOf("_"); // 找到第一個底線的索引
-      const lastDotIndex = file.file_name.lastIndexOf("."); // 找到最後一個句點的索引
-      const newName: string =
-        file.file_name.substring(0, firstUnderscoreIndex) +
-        file.file_name.substring(lastDotIndex); // 取底線前的內容加上最後一個句點以後的文字當副檔名
-      options.value.push({
-        value: file.id,
-        label: newName,
-      });
-    });
-  } catch (error) {
-    console.error("Failed to fetch data:", error);
-  }
-}
+// async function fetchData() {
+//   try {
+//     const userId = 1; // 替換為您的 userId 參數值
+//     const files = await getMyFiles(userId); // 傳入 userId
+//     options.value = [];
+//     //檔案逐筆處理
+//     files.forEach((file) => {
+//       const firstUnderscoreIndex = file.file_name.indexOf("_"); // 找到第一個底線的索引
+//       const lastDotIndex = file.file_name.lastIndexOf("."); // 找到最後一個句點的索引
+//       const newName: string =
+//         file.file_name.substring(0, firstUnderscoreIndex) +
+//         file.file_name.substring(lastDotIndex); // 取底線前的內容加上最後一個句點以後的文字當副檔名
+//       options.value.push({
+//         value: file.id,
+//         label: newName,
+//       });
+//     });
+//   } catch (error) {
+//     console.error("Failed to fetch data:", error);
+//   }
+// }
 
 function handleHistoryAdd(object: { id: number; name: string; text: string }) {
   //let uuid = Date.now()
-  if (chatStore.active) {
+  //if (chatStore.active) {
     let uuid = Date.now()
 		chatStore.addHistory({ title: object.name, uuid: uuid, isEdit: false, id:object.id, name:object.name},[]);
 
     let options: Chat.ConversationRequest = {};
 
-    addChat(chatStore.active, {
+    addChat(uuid, {
       dateTime: new Date().toLocaleString(),
       text: object.text,
       inversion: false,
@@ -99,7 +99,7 @@ function handleHistoryAdd(object: { id: number; name: string; text: string }) {
       requestOptions: { prompt: "", options: { ...options } },
     });
     scrollToBottom();
-  }
+  //}
   if (isMobile.value) appStore.setSiderCollapsed(true);
 }
 
@@ -115,7 +115,7 @@ watch(
 );
 
 onMounted(() => {
-  fetchData();
+  //fetchData();
 });
 </script>
 

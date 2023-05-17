@@ -61,7 +61,10 @@ INSTALLED_APPS = [
     'channels',
     'ChatGPTPDF',
     'dbbackup',
-    #'unAnswerQuestion',
+    'UnAnswerQuestion',
+    'django_celery_beat',
+    'django_celery_results',
+    'dvadmin_celery',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +79,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dvadmin.utils.middleware.ApiLoggingMiddleware",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True  # 如果你只想允许特定的源，不要使用这个设置，而是使用 CORS_ALLOWED_ORIGINS
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:1002",
@@ -247,7 +252,7 @@ LOGGING = {
     },
     "handlers": {
         "servers": {
-            "logging_levels": ["info", "error", "warning"],
+            "logging_levels": ["debug","info", "error", "warning"],
             "class": "dvadmin.utils.log.InterceptTimedRotatingFileHandler",  # 这个路径看你本地放在哪里(下面的log文件)
             "filename": os.path.join(LOGS_FILE, "server.log"),
             "when": "D",
@@ -256,7 +261,12 @@ LOGGING = {
             "backupCount": 1,
             "formatter": "servers",
             "encoding": "utf-8",
-        }
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'django_daphne.log',
+        },
     },
     "loggers": {
         # default日志
@@ -293,6 +303,16 @@ LOGGING = {
             "handlers": ["servers"],
             "level": "INFO",
             "propagate": False
+        },
+        'daphne': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'chatgptpdf': {
+            'handlers': ['servers'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
@@ -430,7 +450,7 @@ PLUGINS_URL_PATTERNS = []
 # ********** 一键导入插件配置开始 **********
 # 例如:
 # from dvadmin_upgrade_center.settings import *   # 升级中心
-# from dvadmin_celery.settings import *           # celery 异步任务
+from dvadmin_celery.settings import *           # celery 异步任务
 # from dvadmin_sms.settings import *              # 短信服务
 # from dvadmin_third.settings import *            # 扫码登录
 # from dvadmin_uniapp.settings import *           # UniApp后端
@@ -443,6 +463,27 @@ MEDIA_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'upload
 MEDIA_URL = '/upload/'
 
 INDEX_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'index')
+HISTORY_ROOT = os.path.join(Path(__file__).resolve().parent.parent.parent, 'history')
 
 os.environ['FILE_UPLOAD_DIR'] = MEDIA_ROOT
 os.environ['FILE_INDEX_DIR'] = INDEX_ROOT
+os.environ['FILE_HISTORY_DIR'] = HISTORY_ROOT
+
+LIBREOFFICE_PROGRAM_PATH ='/Applications/LibreOffice.app/Contents/Resources'
+os.environ['LIBREOFFICE_PROGRAM_PATH'] = LIBREOFFICE_PROGRAM_PATH
+SOFFICE_PATH = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+#SOFFICE_PATH = "/usr/bin/soffice"
+os.environ['SOFFICE_PATH'] = SOFFICE_PATH
+
+CACHES = { # 配置缓存
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f'{REDIS_URL}/1', # 库名可自选1~16
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+}
+BROKER_URL = f'{REDIS_URL}/2' # 库名可自选1~16
+CELERY_RESULT_BACKEND = 'django-db' # celery结果存储到数据库中
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'  # Backend数据库

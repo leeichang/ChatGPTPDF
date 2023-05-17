@@ -29,36 +29,41 @@ export const useAppStore = defineStore("app-store", {
       //}
     },
     setPdf(pdf: File) {
-      console.log("setPdf: ", pdf);
+      //console.log("setPdf: ", pdf);
       this.pdf = pdf;
       this.recordState();
     },
     setUploadPdf(uploadPdf: File) {
-      console.log("setUploadPdf: ", uploadPdf);
+      //console.log("setUploadPdf: ", uploadPdf);
       this.uploadPdf = uploadPdf;
       this.recordState();
     },
     setLoading(loading: boolean) {
-      console.log("setLoading: ", loading);
+      //console.log("setLoading: ", loading);
       this.loading = loading;
       this.recordState();
     },
     setFoldPdf(foldPdf: boolean) {
-      console.log("setFoldPdf: ", foldPdf);
+      //console.log("setFoldPdf: ", foldPdf);
       this.foldPdf = foldPdf;
       this.recordState();
     },
     setDownLoadPdf(downloadPdf: boolean) {
-      console.log("setDownloadPdf: ", downloadPdf);
+      //console.log("setDownloadPdf: ", downloadPdf);
       this.downloadPdf = downloadPdf;
       this.recordState();
     },
     setIsFirstLoad(isFirstLoad: boolean) {
-      console.log("setIsFirstLoad: ", isFirstLoad);
+      //console.log("setIsFirstLoad: ", isFirstLoad);
       this.isFirstLoad = isFirstLoad;
       this.recordState();
     },
-
+    setTriggerDownLoad(triggerDownLoad: boolean) {
+			//console.log("setTriggerDownLoad ori: ", this.triggerDownLoad);
+      //console.log("setTriggerDownLoad new : ", triggerDownLoad);
+      this.triggerDownLoad = triggerDownLoad;
+      this.recordState();
+    },
     recordState() {
       setLocalSetting(this.$state);
     },

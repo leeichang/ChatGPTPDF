@@ -1,13 +1,14 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useMessage } from "naive-ui";
-import { set_qa_documents , uploadFile, } from "@/api/user";
+import { set_qa_documents, uploadFile } from "@/api/user";
 import { t } from "@/locales";
 import { useAppStore } from "@/store";
 
-
 export default defineComponent({
-  emits: { historyAdd: (object: { id: number; name: string;text: string }) => true },
+  emits: {
+    historyAdd: (object: { id: number; name: string; text: string }) => true,
+  },
   name: "FileUploader",
   setup(props, { emit }) {
     const fileInput = ref<HTMLInputElement | null>(null);
@@ -15,9 +16,8 @@ export default defineComponent({
     const uploaded = ref(false);
     const progress = ref(0);
     const message = useMessage();
-		const appStore = useAppStore();
-		const rotating = ref(true);
-
+    const appStore = useAppStore();
+    const rotating = ref(true);
 
     const onUploaderClick = () => {
       fileInput.value?.click();
@@ -27,7 +27,7 @@ export default defineComponent({
       const files = (event.target as HTMLInputElement).files;
 
       if (files) {
-				appStore.setUploadPdf(files[0]);
+        appStore.setUploadPdf(files[0]);
         uploadFiles(files);
       }
     };
@@ -43,46 +43,46 @@ export default defineComponent({
     const uploadFiles = (files: FileList) => {
       uploading.value = true;
       uploaded.value = false;
-			appStore.setLoading(true);
-			//rotating.value = false; // 停止旋转
+      appStore.setLoading(true);
+      //rotating.value = false; // 停止旋转
       let filename: string = "";
       // 上傳文件的邏輯
       let formData = new FormData();
       for (var i = 0; i < files.length; i++) {
         var item: File = files[i];
-        console.log(item);
+        //console.log(item);
         formData.append("file", item, item.name);
         filename = item.name;
       }
+      if (files.length > 0) {
+        uploadFile(formData)
+          .then((res) => {
+            //console.log(res);
+            uploaded.value = true;
+            uploading.value = false;
+            appStore.setLoading(false);
+            let id = res.data.id;
+            let name = filename;
 
-      uploadFile(formData)
-        .then((res) => {
-          console.log(res);
-          uploaded.value = true;
-          uploading.value = false;
-					appStore.setLoading(false);
-          let id = res.data.id;
-          let name = filename;
-
-          emit("historyAdd", { id: id, name: name, text:res.data.data });
-          if (id > 0) {
-            set_qa_documents(id).then((response) => {
-							console.log(response);
-            });
-            appStore.setSelectedKeys(id);
-						message.success(t("common.upload_success"));
-          }
-          setTimeout(() => {
-            uploaded.value = false;
-          }, 3000);
-        })
-        .catch((err) => {
-					uploading.value = false;
-					appStore.setLoading(false);
-          message.error(err);
-        });
+            emit("historyAdd", { id: id, name: name, text: res.data.data });
+            if (id > 0) {
+              set_qa_documents(id).then((response) => {
+                //console.log(response);
+              });
+              appStore.setSelectedKeys(id);
+              message.success(t("common.upload_success"));
+            }
+            setTimeout(() => {
+              uploaded.value = false;
+            }, 3000);
+          })
+          .catch((err) => {
+            uploading.value = false;
+            appStore.setLoading(false);
+            message.error(err);
+          });
+      }
     };
-
 
     return {
       fileInput,
@@ -93,7 +93,7 @@ export default defineComponent({
       onFileInputChange,
       onDrop,
       uploadFiles,
-			rotating,
+      rotating,
     };
   },
 });
@@ -106,17 +106,29 @@ export default defineComponent({
     @drop="onDrop"
     @click="onUploaderClick"
   >
-    <input ref="fileInput" type="file" hidden @change="onFileInputChange" />
+    <input
+      ref="fileInput"
+      type="file"
+      hidden
+      @change="onFileInputChange"
+      multiple
+      accept="
+    application/pdf,
+    text/csv,
+    application/vnd.ms-excel,
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+    application/msword,
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+    text/plain"
+    />
     <div class="tip" v-if="!uploading && !uploaded">
       <p>{{ $t("common.Drog_Drop_File_Here") }}</p>
     </div>
-    <div class="loading"
-			:class="{ rotating: rotating }"
-			v-if="uploading">
+    <div class="loading" :class="{ rotating: rotating }" v-if="uploading">
       <span class="top"></span>
       <span class="bottom"></span>
     </div>
-		<div class="processing" v-if="uploading" >{{ $t("common.processing") }}</div>
+    <div class="processing" v-if="uploading">{{ $t("common.processing") }}</div>
     <div class="message" v-if="uploaded">
       <p>{{ $t("common.upload_success") }}</p>
     </div>
@@ -139,12 +151,12 @@ export default defineComponent({
   background-color: #f7f7f7;
 }
 .processing {
-	position: absolute;
-    top: 45%;
-    left: 150px;
-    transform: translateY(-50%);
-    width: 100%;
-    z-index: 999;
+  position: absolute;
+  top: 45%;
+  left: 150px;
+  transform: translateY(-50%);
+  width: 100%;
+  z-index: 999;
 }
 .loading {
   width: 29px;
@@ -160,7 +172,7 @@ export default defineComponent({
   align-items: center;
   /* 执行动画：动画 时长 线性的 无限次播放
   animation: rotating 2s linear infinite;*/
-	overflow: hidden; /* 隐藏超出容器的部分 */
+  overflow: hidden; /* 隐藏超出容器的部分 */
 }
 .rotating {
   animation: rotating 2s linear infinite;

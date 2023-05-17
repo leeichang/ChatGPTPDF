@@ -18,6 +18,8 @@ from openai.error import AuthenticationError
 from pypdf import PdfReader
 import openai
 from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferWindowMemory
+
 # from .embeddings import OpenAIEmbeddings
 from langchain.embeddings import OpenAIEmbeddings
 import os
@@ -27,6 +29,14 @@ import pinecone
 from application import settings
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from requests.exceptions import ConnectionError
+import tika
+
+tika.initVM()
+from tika import parser
+from langchain.document_loaders import UnstructuredFileLoader
+from langchain.document_loaders.csv_loader import CSVLoader
+import pandas as pd
+from fpdf import FPDF
 # loading the .env file
 dotenv.load_dotenv()
 
@@ -120,6 +130,7 @@ class CustomPromptTemplate(PromptTemplate):
         openai_prompt = self.template.format(**input_variables)
         return openai_prompt
 
+
 template3 = """Create a final answer to the given questions using the provided document excerpts(in no particular order) as references. 
               If you are unable to answer the question, simply state that 我不知道. Do not attempt to fabricate an answer .
 Answer in Traditional Chinese:
@@ -134,7 +145,33 @@ STUFF_PROMPT3 = CustomPromptTemplate(
     template=template3, input_variables=["context", "question"]
 )
 
+template4 = """You are a chatbot having a conversation with a human.
+If you are unable to answer the question, simply state that 我不知道. Do not attempt to fabricate an answer .
+Given the following extracted parts of a long document and a question, create a final answer，
+Answer in Traditional Chinese.
+
+{context}
+
+{chat_history}
+Human: {human_input}
+Chatbot:"""
+
+prompt4 = CustomPromptTemplate(
+    input_variables=["chat_history", "human_input", "context"], 
+    template=template4
+)
+
 index = None
+
+
+def text_handler(text: str) -> str:
+    # Merge hyphenated words
+    text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
+    # Fix newlines in the middle of sentences
+    text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
+    # Remove multiple newlines
+    text = re.sub(r"\n\s*\n", "\n\n", text)
+    return text
 
 
 def parse_pdf(filePath) -> List[str]:
@@ -143,21 +180,59 @@ def parse_pdf(filePath) -> List[str]:
     output = []
     for page in pdf.pages:
         text = page.extract_text()
-        # Merge hyphenated words
-        text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
-        # Fix newlines in the middle of sentences
-        text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
-        # Remove multiple newlines
-        text = re.sub(r"\n\s*\n", "\n\n", text)
-
+        text = text_handler(text)
         output.append(text)
 
     return output
 
 
-def text_to_docs(text: str | List[str]) -> List[Document]:
+def parse_txt(filePath) -> List[Document]:
+    loader = UnstructuredFileLoader(filePath, mode="single")
+    docs = loader.load()
+    return docs
+
+
+def parse_docx(filePath) -> List[str]:
+    raw_xml = parser.from_file(filePath, xmlContent=True)
+    body = raw_xml["content"].split("<body>")[1].split("</body>")[0]
+    body_without_tag = (
+        body.replace("<p>", "")
+        .replace("</p>", "")
+        .replace("<div>", "")
+        .replace("</div>", "")
+        .replace("<p />", "")
+    )
+    text_pages = body_without_tag.split("""<div class="page">""")[1:]
+    num_pages = len(text_pages)
+    if num_pages == int(
+        raw_xml["metadata"]["xmpTPg:NPages"]
+    ):  # check if it worked correctly
+        return text_pages
+
+
+def parse_xlsx(filePath) -> List[str]:
+    data = pd.read_excel(filePath)
+    filename = os.path.basename(filePath)
+    documents = [
+        Document(
+            page_content=str(record), metadata={"filename": filename, "row": i + 1}
+        )
+        for i, record in enumerate(data.to_dict(orient="records"))
+    ]
+    return documents
+
+
+def parse_csv(filePath) -> List[Document]:
+    loader = CSVLoader(file_path=filePath)
+    data = loader.load()
+    return data
+
+
+def text_to_docs(text: str | List[str], filePath: str) -> List[Document]:
     """Converts a string or list of strings to a list of Documents
     with metadata."""
+    if filePath != "":
+        filename = os.path.basename(filePath)
     if isinstance(text, str):
         # Take a single string as one page
         text = [text]
@@ -178,21 +253,79 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
         )
         chunks = text_splitter.split_text(doc.page_content)
         for i, chunk in enumerate(chunks):
-            doc = Document(
-                page_content=chunk, metadata={"page": doc.metadata["page"], "chunk": i}
-            )
-            # Add sources a metadata
-            doc.metadata["source"] = f"{doc.metadata['page']}-{doc.metadata['chunk']}"
-            doc_chunks.append(doc)
+            if not chunk.startswith("文件編號"):
+                chunk = "\n" + chunk
+                doc = Document(
+                    page_content=chunk,
+                    metadata={
+                        "filename": filename,
+                        "page": doc.metadata["page"],
+                        "chunk": i,
+                    },
+                )
+                # Add sources a metadata
+                doc.metadata[
+                    "source"
+                ] = f"{filename}-{doc.metadata['page']}-{doc.metadata['chunk']}"
+                doc_chunks.append(doc)
 
         # 使用切片操作获取前10个元素
-        first_10 = doc_chunks[:10]
+        # first_10 = doc_chunks[:10]
         # print(first_10)
 
     return doc_chunks
 
+def ListDocument2Pdf(docs: List[Document],filePath):
+    font_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fonts", "msyh.ttf")
+        
+    pdf = FPDF(orientation='P', unit='mm', format='A4')
+    pdf.add_page()
+        # Set the font to use, size, and style
+    pdf.add_font('msyh', '', font_path, uni=True)  # 使用支持中文的字體，例如微软雅黑
+    pdf.set_font('msyh', size=10)
+    # Read the text file and split it into lines
+    plus_line = 0
+    i=0
+    for doc in docs:
+        i+=1
+        if i==1 and doc.metadata['row']== 0:
+           plus_line = 1 
+        line = doc.page_content.replace("\n", "")
+        pdf.multi_cell(0, 10, txt=f"{doc.metadata['row'] + plus_line}.{line}", align='L')
+    file_name, file_extension = os.path.splitext(filePath)
+    newfilePath = file_name + '.pdf'
+    pdf.output(newfilePath)
+    
+
+def parse_content(filePath) -> List[Document]:
+    file_name, file_extension = os.path.splitext(filePath)
+    output = []
+    match file_extension.lower():
+        case ".pdf":
+            output = parse_pdf(filePath)
+            # 2. text to docs
+            text = text_to_docs(output, filePath)
+        case ".txt":
+            text = parse_txt(filePath)
+        case ".docx" | ".doc":
+            output = parse_docx(filePath)
+            text = text_to_docs(output, filePath)
+        case ".xlsx" | ".xls":
+            text = parse_xlsx(filePath)
+            ListDocument2Pdf(text,filePath)
+        case ".csv":
+            text = parse_csv(filePath)
+            ListDocument2Pdf(text,filePath)
+
+    return text
+
+
 # 使用 tenacity 進行重試
-@retry(stop=stop_after_attempt(5), wait=wait_fixed(2), retry=retry_if_exception_type(ConnectionError))
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_fixed(2),
+    retry=retry_if_exception_type(ConnectionError),
+)
 def FAISSFromDocuments(docs: List[Document], embeddings: OpenAIEmbeddings) -> FAISS:
     """Creates a FAISS index from a list of Documents"""
 
@@ -201,7 +334,8 @@ def FAISSFromDocuments(docs: List[Document], embeddings: OpenAIEmbeddings) -> FA
     # print(index)
     return index
 
-def embed_docs(docs: List[Document], uuid: str | None) -> VectorStore:
+
+def embed_docs(docs: List[Document], uuid: str | None,path="") -> FAISS:
     """Embeds a list of Documents and returns a FAISS index"""
 
     if uuid is None:
@@ -218,14 +352,24 @@ def embed_docs(docs: List[Document], uuid: str | None) -> VectorStore:
         try:
             # Embed the chunks
             embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)  # type: ignore
-            index = FAISSFromDocuments(docs,embeddings)
+            index = FAISSFromDocuments(docs, embeddings)
             # print(index)
             # Save the index
-            index_path = f"{settings.INDEX_ROOT}/{uuid}"
-            index.save_local(folder_path=index_path)
-            return index
+            if path=="":
+                index_path = f"{settings.INDEX_ROOT}/{uuid}"
+            else:
+                index_path = f"{path}/{uuid}"    
+            existsIndex = get_store_embedding(uuid)
+            if existsIndex is not None:
+                existsIndex.merge_from(index)
+                existsIndex.save_local(folder_path=index_path)
+                return existsIndex
+            else:
+                index.save_local(folder_path=index_path)
+                return index
         except Exception as e:
             print("重試失敗:", e)
+
 
 def pinecone_embed_docs(docs: List[Document], uuid: str | None = None) -> str:
     """Embeds a list of Documents and returns the ID of the Pinecone index"""
@@ -237,7 +381,7 @@ def pinecone_embed_docs(docs: List[Document], uuid: str | None = None) -> str:
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 
     # Initialize Pinecone connection
-    
+
     pinecone.init(
         api_key=PINECONE_API_KEY,  # find at app.pinecone.io
         environment=PINECONE_API_ENV,  # next to api key in console
@@ -245,21 +389,22 @@ def pinecone_embed_docs(docs: List[Document], uuid: str | None = None) -> str:
 
     # Create the index if it does not exist
     index_name = f"index-{uuid}"
-  
+
     try:
-       index = pinecone.Index(index_name=index_name)
+        index = pinecone.Index(index_name=index_name)
     except Exception as error:
-       pinecone.create_index(index_name, dimension=1538)
+        pinecone.create_index(index_name, dimension=1538)
 
     index = Pinecone.from_documents(docs, OpenAIEmbeddings(), index_name=index_name)
     return index
+
 
 def get_pinecone_embedding(uuid: str) -> pinecone.Index:
     """Get embeddings for a list of Documents from a Pinecone index"""
     try:
         pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
         index_name = f"index-{uuid}"
-       
+
         try:
             index = pinecone.Index(index_name=index_name)
         except Exception as error:
@@ -274,11 +419,14 @@ def get_pinecone_embedding(uuid: str) -> pinecone.Index:
         return None
 
 
-def get_store_embedding(uuid: str) -> List[Dict[str, Any]]:
+def get_store_embedding(uuid: str,path="") -> VectorStore:
     """Get embeddings for a list of Documents from a FAISS index"""
     try:
         embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-        index_path = f"{settings.INDEX_ROOT}/{uuid}"
+        if path == "":
+            index_path = f"{settings.INDEX_ROOT}/{uuid}"
+        else:
+            index_path = f"{path}/{uuid}"    
         index = FAISS.load_local(index_path, embeddings)
         # print(index)
         return index
@@ -292,12 +440,14 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
     and returns a list of Documents."""
 
     # Search for similar chunks
-    docs = index.similarity_search(query, k=5)
+    docs = index.similarity_search(query, k=3)
     # print(docs)
     return docs
 
 
-def get_answer_pinecone(index: VectorStore, history: list[dict[str, str]], query: str) -> Dict[str, Any]:
+def get_answer_pinecone(
+    index: VectorStore, history: list[dict[str, str]], query: str
+) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
@@ -326,46 +476,57 @@ def get_answer_pinecone(index: VectorStore, history: list[dict[str, str]], query
 
     return answer
 
+
 def get_answer_summary(docs: List[Document], query: str) -> Dict[str, Any]:
-    model = load_summarize_chain(llm=ChatOpenAI(
+    model = load_summarize_chain(
+        llm=ChatOpenAI(
             temperature=0,
             openai_api_key=OPENAI_API_KEY,
             max_tokens=500,
             model_name="gpt-3.5-turbo",
-        ), chain_type="map_reduce")
+        ),
+        chain_type="map_reduce",
+    )
     model.run(docs)
     return model
 
-def get_answer_qa(docs: List[Document], query: str) -> Dict[str, Any]:
+
+def get_answer_qa(docs: List[Document], query: str,file_ext:str,history:ConversationBufferWindowMemory) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
-
     # Get the answer
-
-    # chain = load_qa_with_sources_chain(
-    #     OpenAI(
-    #         temperature=0, openai_api_key=OPENAI_API_KEY
-    #     ),  # type: ignore
-    #     chain_type="stuff",
-    #     prompt=STUFF_PROMPT2,
-    # )
-    chain = load_qa_chain(
-        ChatOpenAI(
-            temperature=0,
+    if file_ext == ".xlsx" or file_ext == ".xls" or file_ext == ".csv":
+        chain = load_qa_chain(
+            OpenAI(
+            temperature=0.4,
             openai_api_key=OPENAI_API_KEY,
             max_tokens=512,
+            model_name="text-davinci-003",
+            #model_name="gpt-3.5-turbo",
+        ),  # type: ignore
+        chain_type="stuff",
+        prompt=prompt4,
+        memory = history,
+        )
+    else:
+        chain = load_qa_chain(
+        ChatOpenAI(
+            temperature=0.4,
+            openai_api_key=OPENAI_API_KEY,
+            max_tokens=512,
+            #model_name="text-davinci-003",
             model_name="gpt-3.5-turbo",
         ),  # type: ignore
         chain_type="stuff",
-        prompt=STUFF_PROMPT3,
-    )
-
+        prompt=prompt4,
+        memory = history,
+        )
     # Cohere doesn't work very well as of now.
     # chain = load_qa_with_sources_chain(
     #     Cohere(temperature=0), chain_type="stuff", prompt=STUFF_PROMPT  # type: ignore
     # )
-    final_prompt = STUFF_PROMPT3.generate_prompt({"context": docs, "question": query})
-    
-    answer = chain({"input_documents": docs, "question": query})
+    final_prompt = prompt4.generate_prompt({"context": docs, "chat_history": history, "human_input": query})
+
+    answer = chain({"input_documents": docs, "human_input": query}, return_only_outputs=True)
     #
     return answer
 
@@ -398,15 +559,14 @@ def get_answer(
 
     new_history = []
     humanMessage = ""
-    aiMessage = ""   
+    aiMessage = ""
     for message in history:
         if message.type == "human" and humanMessage == "":
             humanMessage = message.content
         elif message.type == "ai" and aiMessage == "":
             aiMessage = message.content
         if humanMessage != "" and aiMessage != "":
-            new_message = { "Human":humanMessage,
-                            "AI":aiMessage }
+            new_message = {"Human": humanMessage, "AI": aiMessage}
             new_history.append(new_message)
             humanMessage = ""
             aiMessage = ""
@@ -424,7 +584,7 @@ def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     # print("docs: ", docs)
     # Get sources for the answer
     sources = answer.get("source_documents", [])
-    if sources: 
+    if sources:
         sources = answer["source_documents"]
 
         source_docs = []
@@ -435,6 +595,7 @@ def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
         return source_docs
     else:
         return []
+
 
 def get_sources_qa(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
@@ -450,15 +611,15 @@ def get_sources_qa(answer: Dict[str, Any], docs: List[Document]) -> List[Documen
 
     return source_docs
 
+
 def openai_chat(input):
     messages = [
-    {"role": "system", "content": "You are a helpful and kind AI Assistant."},
-]
+        {"role": "system", "content": "You are a helpful and kind AI Assistant."},
+    ]
     if input:
         messages.append({"role": "user", "content": input})
         chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages= messages,
-            temperature=0, max_tokens=2048 
+            model="gpt-3.5-turbo", messages=messages, temperature=0, max_tokens=2048
         )
         reply = chat.choices[0]["message"]["content"]
         return reply

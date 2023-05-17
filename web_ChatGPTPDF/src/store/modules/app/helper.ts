@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { ss } from "@/utils/storage";
 const LOCAL_NAME = "appSetting";
 
@@ -16,10 +17,12 @@ export interface AppState {
 	foldPdf: boolean;
 	downloadPdf: boolean;
 	isFirstLoad :boolean;
+	triggerDownLoad: boolean;
+	user_guid: string;
 }
 
 export function defaultSetting(): AppState {
-  return {
+	return {
     siderCollapsed: false,
     theme: "light",
     language: "zh-TW",
@@ -30,12 +33,14 @@ export function defaultSetting(): AppState {
 		foldPdf: false,
 		downloadPdf: false,
 		isFirstLoad :true,
+		triggerDownLoad: false,
+		user_guid: uuidv4(),  // 使用 uuid 生成 user_guid,
   };
 }
 
 export function getLocalSetting(): AppState {
   const localSetting: AppState | undefined = ss.get(LOCAL_NAME);
-  console.log("localSetting", localSetting);
+  //console.log("localSetting", localSetting);
   return { ...defaultSetting(), ...localSetting };
 }
 

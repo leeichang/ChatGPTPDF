@@ -31,9 +31,11 @@ async function handleSelect({ uuid }: Chat.History) {
     let id: number = chatStore.chat[chatIndex].pdfFileId;
     if (id > 0) {
       set_qa_documents(id).then((response) => {
-        console.log(response);
+        //console.log(response);
       });
-      appStore.setSelectedKeys(id);
+
+      	appStore.setSelectedKeys(id);
+
     }
   }
 }
@@ -50,6 +52,7 @@ function handleEdit(
 function handleDelete(index: number, event?: MouseEvent | TouchEvent) {
   event?.stopPropagation();
   chatStore.deleteHistory(index);
+	appStore.setTriggerDownLoad(true);
   if (isMobile.value) appStore.setSiderCollapsed(true);
 }
 
