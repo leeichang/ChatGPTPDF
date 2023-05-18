@@ -3,6 +3,12 @@
 import os
 import sys
 
+import debugpy
+
+# try:
+#     debugpy.listen(('0.0.0.0', 5678))
+# except Exception as e:
+#     print(f"Debugpy server already listening: {e}")
 
 def main():
     """Run administrative tasks."""

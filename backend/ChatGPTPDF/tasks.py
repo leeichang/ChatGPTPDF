@@ -8,11 +8,15 @@ from datetime import datetime
 from django.db.models.fields import BigIntegerField
 from application import settings
 
+import debugpy
+# # Replace 5678 with the port you want to use for debugging
+# debugpy.listen(('0.0.0.0', 5678))
+
+# # Pause execution until debugger is attached
+# debugpy.wait_for_client()
+
 @shared_task
 def process_history_embedding(guid: str,messages: str):
-    # import ptvsd
-    # ptvsd.enable_attach(address=('localhost', 5678), redirect_output=True)
-    # ptvsd.wait_for_attach()
 
     print("process_history_embedding",guid,messages)
     prompt = f"""請依據以下內容總結出對話的摘要\n
@@ -27,3 +31,8 @@ def process_history_embedding(guid: str,messages: str):
     historyIndex = embed_docs([doc],guid,settings.HISTORY_ROOT)
 
 
+@shared_task
+def clear_cache():
+    print("call clear_cache")
+    from .CacheManager import CacheManager  # Import here
+    CacheManager().clear_expired()

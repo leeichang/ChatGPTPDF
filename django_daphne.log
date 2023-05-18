@@ -2643,3 +2643,306 @@ HTTP response complete for ['127.0.0.1', 59938]
 HTTP 200 response started for ['127.0.0.1', 59939]
 HTTP close for ['127.0.0.1', 59939]
 HTTP response complete for ['127.0.0.1', 59939]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 50861]
+HTTP 200 response started for ['127.0.0.1', 50861]
+HTTP close for ['127.0.0.1', 50861]
+HTTP response complete for ['127.0.0.1', 50861]
+HTTP b'POST' request for ['127.0.0.1', 50870]
+HTTP 200 response started for ['127.0.0.1', 50870]
+HTTP close for ['127.0.0.1', 50870]
+HTTP response complete for ['127.0.0.1', 50870]
+HTTP b'POST' request for ['127.0.0.1', 50878]
+HTTP 200 response started for ['127.0.0.1', 50878]
+HTTP close for ['127.0.0.1', 50878]
+HTTP response complete for ['127.0.0.1', 50878]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 51026]
+HTTP 200 response started for ['127.0.0.1', 51026]
+HTTP close for ['127.0.0.1', 51026]
+HTTP response complete for ['127.0.0.1', 51026]
+HTTP b'POST' request for ['127.0.0.1', 51036]
+HTTP 200 response started for ['127.0.0.1', 51036]
+HTTP close for ['127.0.0.1', 51036]
+HTTP response complete for ['127.0.0.1', 51036]
+HTTP b'POST' request for ['127.0.0.1', 51046]
+HTTP 200 response started for ['127.0.0.1', 51046]
+HTTP close for ['127.0.0.1', 51046]
+HTTP response complete for ['127.0.0.1', 51046]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 51158]
+HTTP 200 response started for ['127.0.0.1', 51158]
+HTTP close for ['127.0.0.1', 51158]
+HTTP response complete for ['127.0.0.1', 51158]
+HTTP b'POST' request for ['127.0.0.1', 51177]
+HTTP 200 response started for ['127.0.0.1', 51177]
+HTTP close for ['127.0.0.1', 51177]
+HTTP response complete for ['127.0.0.1', 51177]
+HTTP b'POST' request for ['127.0.0.1', 51188]
+HTTP 200 response started for ['127.0.0.1', 51188]
+HTTP close for ['127.0.0.1', 51188]
+HTTP response complete for ['127.0.0.1', 51188]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 51289]
+HTTP 200 response started for ['127.0.0.1', 51289]
+HTTP close for ['127.0.0.1', 51289]
+HTTP response complete for ['127.0.0.1', 51289]
+HTTP b'POST' request for ['127.0.0.1', 51334]
+HTTP 200 response started for ['127.0.0.1', 51334]
+HTTP close for ['127.0.0.1', 51334]
+HTTP response complete for ['127.0.0.1', 51334]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 51410]
+HTTP 200 response started for ['127.0.0.1', 51410]
+HTTP close for ['127.0.0.1', 51410]
+HTTP response complete for ['127.0.0.1', 51410]
+HTTP b'POST' request for ['127.0.0.1', 51420]
+HTTP b'POST' request for ['127.0.0.1', 51455]
+Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/staticfiles.py", line 44, in __call__
+    return await self.application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/routing.py", line 71, in __call__
+    return await application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/asgiref/sync.py", line 436, in __call__
+    future = loop.run_in_executor(
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/asyncio/base_events.py", line 813, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/concurrent/futures/thread.py", line 169, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+HTTP 500 response started for ['127.0.0.1', 51455]
+HTTP close for ['127.0.0.1', 51455]
+HTTP response complete for ['127.0.0.1', 51455]
+HTTP b'POST' request for ['127.0.0.1', 51456]
+Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/staticfiles.py", line 44, in __call__
+    return await self.application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/routing.py", line 71, in __call__
+    return await application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/asgiref/sync.py", line 436, in __call__
+    future = loop.run_in_executor(
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/asyncio/base_events.py", line 813, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/concurrent/futures/thread.py", line 169, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+HTTP 500 response started for ['127.0.0.1', 51456]
+HTTP close for ['127.0.0.1', 51456]
+HTTP response complete for ['127.0.0.1', 51456]
+HTTP 200 response started for ['127.0.0.1', 51420]
+HTTP close for ['127.0.0.1', 51420]
+HTTP response complete for ['127.0.0.1', 51420]
+Exception inside application: cannot schedule new futures after shutdown
+Traceback (most recent call last):
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/staticfiles.py", line 44, in __call__
+    return await self.application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/channels/routing.py", line 71, in __call__
+    return await application(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 190, in handle
+    await self.send_response(response, send)
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/django/core/handlers/asgi.py", line 296, in send_response
+    await sync_to_async(response.close, thread_sensitive=True)()
+  File "/Volumes/Lee_Mac/Home/Lee_Documents/AI/django-vue-admin-dev/venv/lib/python3.10/site-packages/asgiref/sync.py", line 436, in __call__
+    future = loop.run_in_executor(
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/asyncio/base_events.py", line 813, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/Users/ichang/.pyenv2/versions/3.10.2/lib/python3.10/concurrent/futures/thread.py", line 167, in submit
+    raise RuntimeError('cannot schedule new futures after shutdown')
+RuntimeError: cannot schedule new futures after shutdown
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 51506]
+HTTP 200 response started for ['127.0.0.1', 51506]
+HTTP close for ['127.0.0.1', 51506]
+HTTP response complete for ['127.0.0.1', 51506]
+HTTP b'GET' request for ['127.0.0.1', 51509]
+HTTP 200 response started for ['127.0.0.1', 51509]
+HTTP response chunk for ['127.0.0.1', 51509]
+HTTP response chunk for ['127.0.0.1', 51509]
+HTTP close for ['127.0.0.1', 51509]
+HTTP response complete for ['127.0.0.1', 51509]
+HTTP b'GET' request for ['127.0.0.1', 51512]
+HTTP b'GET' request for ['127.0.0.1', 51514]
+HTTP 200 response started for ['127.0.0.1', 51514]
+HTTP response chunk for ['127.0.0.1', 51514]
+HTTP response chunk for ['127.0.0.1', 51514]
+HTTP close for ['127.0.0.1', 51514]
+HTTP response complete for ['127.0.0.1', 51514]
+HTTP 200 response started for ['127.0.0.1', 51512]
+HTTP close for ['127.0.0.1', 51512]
+HTTP response complete for ['127.0.0.1', 51512]
+HTTP b'POST' request for ['127.0.0.1', 51524]
+HTTP 200 response started for ['127.0.0.1', 51524]
+HTTP close for ['127.0.0.1', 51524]
+HTTP response complete for ['127.0.0.1', 51524]
+HTTP b'POST' request for ['127.0.0.1', 51532]
+HTTP 200 response started for ['127.0.0.1', 51532]
+HTTP close for ['127.0.0.1', 51532]
+HTTP response complete for ['127.0.0.1', 51532]
+HTTP b'POST' request for ['127.0.0.1', 51566]
+HTTP 200 response started for ['127.0.0.1', 51566]
+HTTP close for ['127.0.0.1', 51566]
+HTTP response complete for ['127.0.0.1', 51566]
+HTTP b'POST' request for ['127.0.0.1', 51578]
+HTTP 200 response started for ['127.0.0.1', 51578]
+HTTP close for ['127.0.0.1', 51578]
+HTTP response complete for ['127.0.0.1', 51578]
+HTTP b'POST' request for ['127.0.0.1', 51587]
+HTTP 200 response started for ['127.0.0.1', 51587]
+HTTP close for ['127.0.0.1', 51587]
+HTTP response complete for ['127.0.0.1', 51587]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 50096]
+HTTP 200 response started for ['127.0.0.1', 50096]
+HTTP close for ['127.0.0.1', 50096]
+HTTP response complete for ['127.0.0.1', 50096]
+HTTP b'GET' request for ['127.0.0.1', 50100]
+HTTP 200 response started for ['127.0.0.1', 50100]
+HTTP response chunk for ['127.0.0.1', 50100]
+HTTP response chunk for ['127.0.0.1', 50100]
+HTTP close for ['127.0.0.1', 50100]
+HTTP response complete for ['127.0.0.1', 50100]
+HTTP b'GET' request for ['127.0.0.1', 50104]
+HTTP b'GET' request for ['127.0.0.1', 50106]
+HTTP 200 response started for ['127.0.0.1', 50106]
+HTTP response chunk for ['127.0.0.1', 50106]
+HTTP response chunk for ['127.0.0.1', 50106]
+HTTP close for ['127.0.0.1', 50106]
+HTTP response complete for ['127.0.0.1', 50106]
+HTTP 200 response started for ['127.0.0.1', 50104]
+HTTP close for ['127.0.0.1', 50104]
+HTTP response complete for ['127.0.0.1', 50104]
+HTTP b'POST' request for ['127.0.0.1', 50114]
+HTTP 200 response started for ['127.0.0.1', 50114]
+HTTP close for ['127.0.0.1', 50114]
+HTTP response complete for ['127.0.0.1', 50114]
+HTTP b'POST' request for ['127.0.0.1', 50136]
+HTTP 200 response started for ['127.0.0.1', 50136]
+HTTP close for ['127.0.0.1', 50136]
+HTTP response complete for ['127.0.0.1', 50136]
+HTTP b'POST' request for ['127.0.0.1', 50148]
+HTTP 200 response started for ['127.0.0.1', 50148]
+HTTP close for ['127.0.0.1', 50148]
+HTTP response complete for ['127.0.0.1', 50148]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 50390]
+HTTP 200 response started for ['127.0.0.1', 50390]
+HTTP close for ['127.0.0.1', 50390]
+HTTP response complete for ['127.0.0.1', 50390]
+HTTP b'GET' request for ['127.0.0.1', 50392]
+HTTP 200 response started for ['127.0.0.1', 50392]
+HTTP response chunk for ['127.0.0.1', 50392]
+HTTP response chunk for ['127.0.0.1', 50392]
+HTTP close for ['127.0.0.1', 50392]
+HTTP response complete for ['127.0.0.1', 50392]
+HTTP b'GET' request for ['127.0.0.1', 50396]
+HTTP b'GET' request for ['127.0.0.1', 50398]
+HTTP 200 response started for ['127.0.0.1', 50398]
+HTTP response chunk for ['127.0.0.1', 50398]
+HTTP response chunk for ['127.0.0.1', 50398]
+HTTP close for ['127.0.0.1', 50398]
+HTTP response complete for ['127.0.0.1', 50398]
+HTTP 200 response started for ['127.0.0.1', 50396]
+HTTP close for ['127.0.0.1', 50396]
+HTTP response complete for ['127.0.0.1', 50396]
+HTTP b'POST' request for ['127.0.0.1', 50413]
+HTTP 200 response started for ['127.0.0.1', 50413]
+HTTP close for ['127.0.0.1', 50413]
+HTTP response complete for ['127.0.0.1', 50413]
+HTTP b'POST' request for ['127.0.0.1', 50418]
+HTTP 200 response started for ['127.0.0.1', 50418]
+HTTP close for ['127.0.0.1', 50418]
+HTTP response complete for ['127.0.0.1', 50418]
+HTTP b'POST' request for ['127.0.0.1', 50427]
+HTTP 200 response started for ['127.0.0.1', 50427]
+HTTP close for ['127.0.0.1', 50427]
+HTTP response complete for ['127.0.0.1', 50427]
+HTTP b'POST' request for ['127.0.0.1', 50487]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 50555]
+HTTP 200 response started for ['127.0.0.1', 50555]
+HTTP close for ['127.0.0.1', 50555]
+HTTP response complete for ['127.0.0.1', 50555]
+HTTP b'POST' request for ['127.0.0.1', 50581]
+HTTP 200 response started for ['127.0.0.1', 50581]
+HTTP close for ['127.0.0.1', 50581]
+HTTP response complete for ['127.0.0.1', 50581]
+HTTP b'POST' request for ['127.0.0.1', 50586]
+HTTP 200 response started for ['127.0.0.1', 50586]
+HTTP close for ['127.0.0.1', 50586]
+HTTP response complete for ['127.0.0.1', 50586]
+HTTP b'POST' request for ['127.0.0.1', 50673]
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+HTTP b'POST' request for ['127.0.0.1', 50731]
+HTTP 200 response started for ['127.0.0.1', 50731]
+HTTP close for ['127.0.0.1', 50731]
+HTTP response complete for ['127.0.0.1', 50731]
+HTTP b'POST' request for ['127.0.0.1', 50742]
+HTTP 200 response started for ['127.0.0.1', 50742]
+HTTP close for ['127.0.0.1', 50742]
+HTTP response complete for ['127.0.0.1', 50742]
+HTTP b'POST' request for ['127.0.0.1', 50747]
+HTTP 200 response started for ['127.0.0.1', 50747]
+HTTP close for ['127.0.0.1', 50747]
+HTTP response complete for ['127.0.0.1', 50747]

@@ -487,3 +487,11 @@ CACHES = { # 配置缓存
 BROKER_URL = f'{REDIS_URL}/2' # 库名可自选1~16
 CELERY_RESULT_BACKEND = 'django-db' # celery结果存储到数据库中
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'  # Backend数据库
+
+from datetime import timedelta
+CELERY_BEAT_SCHEDULE = {
+    'clear_cache_every_15_minutes': {
+        'task': 'ChatGPTPDF.tasks.clear_cache',  # replace with your task module
+        'schedule': timedelta(minutes=5),
+    },
+}

@@ -132,6 +132,8 @@ npm run dev
 或使用 daphne :
   daphne -b 0.0.0.0 -p 8000 application.asgi:application
 ~~~
+celery 
+  celery --app application.celery worker -B --loglevel=info
 
 ### 访问项目
 
